@@ -252,49 +252,58 @@ async function loadData(){
 
     var pend=rows.filter(function(r){return String(getField(r,'ESTADO REPARACION')||'').toLowerCase().trim()==='pendiente';});
     lastTotalRows=rows.length;
-    incidencias=pend.map(function(r,i){return{
-      id:i,
-      carretilla:getField(r,'CARRETILLA')||'?',
-      usuario:getField(r,'USUARIO')||'—',
-      incidencia:getField(r,'INCIDENCIA')||'—',
-      fechaAveria:excelDate(getField(r,'FECHA AVERIA')),
-      fechaAviso:excelDate(getField(r,'FECHA AVISO\n Javier 71908')),
-      responsable:getField(r,'JJEE / AUX_x002e_ DESC_x002e_','JJEE','AUX')||'—',
-      avisadoJavier:isChecked(getField(r,'AVISADO JAVIER','AVISADO')),
-      prioridad:getField(r,'PRIORIDAD')||'',
-      estado:getField(r,'ESTADO REPARACION')||'—',
-      observaciones:getField(r,'OBSERVACIONES')||''
-    };});
-    // Historial completo (todas las filas, no solo pendientes), para la
-    // ficha de vehiculo a la que se llega escaneando el QR de cada carretilla.
-    allRows=rows.map(function(r,i){return{
-      idx:i,
-      carretilla:getField(r,'CARRETILLA')||'?',
-      usuario:getField(r,'USUARIO')||'—',
-      incidencia:getField(r,'INCIDENCIA')||'—',
-      fechaAveria:excelDate(getField(r,'FECHA AVERIA')),
-      fechaAveriaRaw:excelDateRaw(getField(r,'FECHA AVERIA')),
-      fechaAviso:excelDate(getField(r,'FECHA AVISO\n Javier 71908')),
-      responsable:getField(r,'JJEE / AUX_x002e_ DESC_x002e_','JJEE','AUX')||'—',
-      avisadoJavier:isChecked(getField(r,'AVISADO JAVIER','AVISADO')),
-      prioridad:getField(r,'PRIORIDAD')||'',
-      estado:getField(r,'ESTADO REPARACION')||'—',
-      fechaArreglo:excelDate(getField(r,'FECHA ARREGLO')),
-      observaciones:getField(r,'OBSERVACIONES')||''
-    };});
-    document.getElementById('stat-total').textContent=incidencias.length;
-    document.getElementById('stat-alta').textContent=incidencias.filter(function(i){return(i.prioridad||'').toUpperCase()==='ALTA';}).length;
-    document.getElementById('stat-resto').textContent=incidencias.filter(function(i){return(i.prioridad||'').toUpperCase()!=='ALTA';}).length;
-    // Si la URL trae ?carretilla=CODIGO (por ejemplo, al escanear el QR
-    // pegado en una carretilla concreta), se muestra su ficha completa en
-    // vez del listado general de toda la flota.
-    var urlCar=new URLSearchParams(location.search).get('carretilla');
-    if(urlCar){renderVehiclePage(urlCar);}else{renderGrid();}
-    updateSyncInfo(true);
+
+    try{
+      incidencias=pend.map(function(r,i){return{
+        id:i,
+        carretilla:getField(r,'CARRETILLA')||'?',
+        usuario:getField(r,'USUARIO')||'—',
+        incidencia:getField(r,'INCIDENCIA')||'—',
+        fechaAveria:excelDate(getField(r,'FECHA AVERIA')),
+        fechaAviso:excelDate(getField(r,'FECHA AVISO\n Javier 71908')),
+        responsable:getField(r,'JJEE / AUX_x002e_ DESC_x002e_','JJEE','AUX')||'—',
+        avisadoJavier:isChecked(getField(r,'AVISADO JAVIER','AVISADO')),
+        prioridad:getField(r,'PRIORIDAD')||'',
+        estado:getField(r,'ESTADO REPARACION')||'—',
+        observaciones:getField(r,'OBSERVACIONES')||''
+      };});
+      // Historial completo (todas las filas, no solo pendientes), para la
+      // ficha de vehiculo a la que se llega escaneando el QR de cada carretilla.
+      allRows=rows.map(function(r,i){return{
+        idx:i,
+        carretilla:getField(r,'CARRETILLA')||'?',
+        usuario:getField(r,'USUARIO')||'—',
+        incidencia:getField(r,'INCIDENCIA')||'—',
+        fechaAveria:excelDate(getField(r,'FECHA AVERIA')),
+        fechaAveriaRaw:excelDateRaw(getField(r,'FECHA AVERIA')),
+        fechaAviso:excelDate(getField(r,'FECHA AVISO\n Javier 71908')),
+        responsable:getField(r,'JJEE / AUX_x002e_ DESC_x002e_','JJEE','AUX')||'—',
+        avisadoJavier:isChecked(getField(r,'AVISADO JAVIER','AVISADO')),
+        prioridad:getField(r,'PRIORIDAD')||'',
+        estado:getField(r,'ESTADO REPARACION')||'—',
+        fechaArreglo:excelDate(getField(r,'FECHA ARREGLO')),
+        observaciones:getField(r,'OBSERVACIONES')||''
+      };});
+      document.getElementById('stat-total').textContent=incidencias.length;
+      document.getElementById('stat-alta').textContent=incidencias.filter(function(i){return(i.prioridad||'').toUpperCase()==='ALTA';}).length;
+      document.getElementById('stat-resto').textContent=incidencias.filter(function(i){return(i.prioridad||'').toUpperCase()!=='ALTA';}).length;
+      // Si la URL trae ?carretilla=CODIGO (por ejemplo, al escanear el QR
+      // pegado en una carretilla concreta), se muestra su ficha completa en
+      // vez del listado general de toda la flota.
+      var urlCar=new URLSearchParams(location.search).get('carretilla');
+      if(urlCar){renderVehiclePage(urlCar);}else{renderGrid();}
+      updateSyncInfo(true);
+    }catch(renderErr){
+      // Un fallo aqui es un bug pintando la pagina, NO un problema de
+      // conexion — los datos ya llegaron bien. Se avisa como lo que es, en
+      // vez de sugerir CORS, que llevaria a mirar en el sitio equivocado.
+      showError('Los datos llegaron bien, pero hubo un error al mostrarlos ('+renderErr.message+').','Esto es un fallo en la propia pagina, no de conexion ni de Power Automate.','');
+      updateSyncInfo(false);
+    }
   }catch(error){
     // Esto es lo que salta con un bloqueo CORS: el navegador no deja ni
     // empezar a leer la respuesta, solo se ve "Failed to fetch".
-    showError('No se pudo conectar con el flujo ('+error.message+').','La causa mas probable es CORS: el flujo debe devolver "Access-Control-Allow-Origin: *". Revisa la consola del navegador (F12) para el error exacto.','');
+    showError('No se pudo conectar con el flujo ('+error.message+').','La causa más probable es CORS: el flujo debe devolver "Access-Control-Allow-Origin: *". Revisa la consola del navegador (F12) para el error exacto.','');
     updateSyncInfo(false);
   }
 }
@@ -414,7 +423,14 @@ function renderVehiclePage(carCodeRaw){
       }).join('')
     : '<div style="color:var(--muted);text-align:center;padding:20px">Sin historial registrado para esta carretilla.</div>';
 
-  document.getElementById('content').innerHTML=
+  var container=document.getElementById('grid');
+  if(!container)return;
+  // #grid trae "display:grid" pensado para colocar tarjetas en columnas.
+  // Para la ficha de vehiculo se anula aqui (solo aqui), y las tarjetas de
+  // pendientes recuperan su propia cuadricula interna mas abajo (pendHtml
+  // ya las envuelve en su propio div.grid).
+  container.style.display='block';
+  container.innerHTML=
     '<div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:26px">'
     +getVehicleImg(carCode,110,80)
     +'<div><div style="font-size:28px;font-weight:800;color:var(--light)">'+carCode+'</div>'
