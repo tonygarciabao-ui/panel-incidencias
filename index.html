@@ -135,7 +135,7 @@
   </div>
 </header>
 <main>
-  <div class="toolbar">
+  <div class="toolbar" id="toolbar">
     <div class="search-box">
       <span class="si">🔍</span>
       <input type="text" id="search" placeholder="Buscar carretilla, usuario o incidencia…" oninput="renderGrid()">
@@ -145,7 +145,7 @@
     <button class="filter-btn" id="btn-media" onclick="setFilter('Media')">🟡 Media</button>
     <button class="filter-btn" id="btn-baja" onclick="setFilter('Baja')">🟢 Baja</button>
   </div>
-  <div class="section-title">Carretillas con incidencias pendientes</div>
+  <div class="section-title" id="section-title-all">Carretillas con incidencias pendientes</div>
   <div class="grid" id="grid"></div>
 </main>
 <div class="overlay" id="overlay" onclick="closeDetail(event)">
@@ -162,6 +162,7 @@
       <div class="detail-field"><label>🔧 Responsable</label><div class="val" id="d-re"></div></div>
       <div class="detail-field"><label>⚡ Prioridad</label><div class="val" id="d-pr"></div></div>
       <div class="detail-field"><label>🔄 Estado</label><div class="val" id="d-es"></div></div>
+      <div class="detail-field"><label>📞 Aviso a Javier</label><div class="val" id="d-av"></div></div>
     </div>
     <div class="detail-obs"><label>📝 Observaciones</label><div class="val" id="d-ob"></div></div>
   </div>
@@ -173,6 +174,7 @@
 // por CORS (se ve como "Failed to fetch", sin mas detalle).
 var JSON_URL = 'https://default4c49bed785da470cafc37735b371a3.43.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/24/workflows/f62cce79b444494aad955507360db643/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=VSWqnfDZqHEbg9rOCYfYYKl3DPhroUBpsK0QDDIWcQA';
 var incidencias = [];
+var allRows = []; // TODO el historico (pendientes y solucionadas), para la ficha de vehiculo por QR
 var activeFilter = 'all';
 var lastTotalRows = null;
 
@@ -181,6 +183,17 @@ function excelDate(s){
   var d=new Date((parseInt(s)-25569)*86400*1000);
   if(isNaN(d.getTime()))return String(s);
   return d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+// Version numerica de excelDate, para poder ORDENAR el historial por fecha
+// real en vez de por el texto ya formateado (que no ordena bien).
+function excelDateRaw(s){
+  if(s===undefined||s===null||s==='')return null;
+  var str=String(s).trim();
+  if(/^\d+(\.\d+)?$/.test(str)){
+    return (parseFloat(str)-25569)*86400*1000;
+  }
+  var d=new Date(s);
+  return isNaN(d.getTime())?null:d.getTime();
 }
 
 // El campo de responsable llega con caracteres especiales codificados por
@@ -207,6 +220,15 @@ function extractRows(data){
   return null;
 }
 
+// El campo llega de Power Automate en formatos distintos segun el conector
+// (booleano nativo true/false, texto "true"/"TRUE", "Sí"/"1"...), asi que se
+// normaliza aqui en vez de asumir un unico formato.
+function isChecked(v){
+  if(v===true)return true;
+  if(v===false||v===undefined||v===null)return false;
+  var s=String(v).trim().toLowerCase();
+  return s==='true'||s==='verdadero'||s==='sí'||s==='si'||s==='1'||s==='x'||s==='yes';
+}
 async function loadData(){
   try{
     var response=await fetch(JSON_URL);
@@ -238,14 +260,36 @@ async function loadData(){
       fechaAveria:excelDate(getField(r,'FECHA AVERIA')),
       fechaAviso:excelDate(getField(r,'FECHA AVISO\n Javier 71908')),
       responsable:getField(r,'JJEE / AUX_x002e_ DESC_x002e_','JJEE','AUX')||'—',
+      avisadoJavier:isChecked(getField(r,'AVISADO JAVIER','AVISADO')),
       prioridad:getField(r,'PRIORIDAD')||'',
       estado:getField(r,'ESTADO REPARACION')||'—',
+      observaciones:getField(r,'OBSERVACIONES')||''
+    };});
+    // Historial completo (todas las filas, no solo pendientes), para la
+    // ficha de vehiculo a la que se llega escaneando el QR de cada carretilla.
+    allRows=rows.map(function(r,i){return{
+      idx:i,
+      carretilla:getField(r,'CARRETILLA')||'?',
+      usuario:getField(r,'USUARIO')||'—',
+      incidencia:getField(r,'INCIDENCIA')||'—',
+      fechaAveria:excelDate(getField(r,'FECHA AVERIA')),
+      fechaAveriaRaw:excelDateRaw(getField(r,'FECHA AVERIA')),
+      fechaAviso:excelDate(getField(r,'FECHA AVISO\n Javier 71908')),
+      responsable:getField(r,'JJEE / AUX_x002e_ DESC_x002e_','JJEE','AUX')||'—',
+      avisadoJavier:isChecked(getField(r,'AVISADO JAVIER','AVISADO')),
+      prioridad:getField(r,'PRIORIDAD')||'',
+      estado:getField(r,'ESTADO REPARACION')||'—',
+      fechaArreglo:excelDate(getField(r,'FECHA ARREGLO')),
       observaciones:getField(r,'OBSERVACIONES')||''
     };});
     document.getElementById('stat-total').textContent=incidencias.length;
     document.getElementById('stat-alta').textContent=incidencias.filter(function(i){return(i.prioridad||'').toUpperCase()==='ALTA';}).length;
     document.getElementById('stat-resto').textContent=incidencias.filter(function(i){return(i.prioridad||'').toUpperCase()!=='ALTA';}).length;
-    renderGrid();
+    // Si la URL trae ?carretilla=CODIGO (por ejemplo, al escanear el QR
+    // pegado en una carretilla concreta), se muestra su ficha completa en
+    // vez del listado general de toda la flota.
+    var urlCar=new URLSearchParams(location.search).get('carretilla');
+    if(urlCar){renderVehiclePage(urlCar);}else{renderGrid();}
     updateSyncInfo(true);
   }catch(error){
     // Esto es lo que salta con un bloqueo CORS: el navegador no deja ni
@@ -328,6 +372,7 @@ function buildCard(item,delay){
       '<div class="meta-row">'+
         '<div class="meta-chip">📅 <strong>'+item.fechaAveria+'</strong></div>'+
         '<div class="meta-chip">📣 <strong>'+item.fechaAviso+'</strong></div>'+
+        '<div class="meta-chip" style="'+(item.avisadoJavier?'border-color:#22c55e55;color:#86efac':'border-color:#94a3b855')+'">'+(item.avisadoJavier?'☑':'☐')+' <strong>'+(item.avisadoJavier?'Avisado a Javier':'Javier sin avisar')+'</strong></div>'+
       '</div>'+
     '</div>'+
     '<div class="card-footer">'+
@@ -337,6 +382,47 @@ function buildCard(item,delay){
   '</div>';
 }
 
+// Ficha completa de UNA carretilla, a la que se llega por el QR pegado en
+// el propio vehiculo (?carretilla=CODIGO en la URL). Muestra primero lo
+// pendiente (o un aviso claro de que no hay nada pendiente) y despues el
+// historial completo, incluidas las ya solucionadas.
+function renderVehiclePage(carCodeRaw){
+  var toolbar=document.getElementById('toolbar');if(toolbar)toolbar.style.display='none';
+  var sectionAll=document.getElementById('section-title-all');if(sectionAll)sectionAll.style.display='none';
+  var carCode=String(carCodeRaw||'').trim();
+  var carUp=carCode.toUpperCase();
+  var mine=allRows.filter(function(r){return String(r.carretilla).trim().toUpperCase()===carUp;});
+  mine.sort(function(a,b){return(b.fechaAveriaRaw||0)-(a.fechaAveriaRaw||0);});
+  var pendientes=incidencias.filter(function(i){return String(i.carretilla).trim().toUpperCase()===carUp;});
+
+  var vLabel=vehicleLabel(carCode),vColor=vehicleColor(carCode);
+  var pendHtml=pendientes.length
+    ? '<div class="grid">'+pendientes.map(function(item,i){return buildCard(item,i*40);}).join('')+'</div>'
+    : '<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:18px;text-align:center;color:#86efac;font-weight:700">✅ Sin incidencias pendientes</div>';
+
+  var histHtml=mine.length
+    ? mine.map(function(r){
+        var pend=r.estado.toLowerCase().trim()==='pendiente';
+        var solu=r.estado.toLowerCase().indexOf('solucion')>=0;
+        var col=pend?'#f59e0b':(solu?'#22c55e':'#94a3b8');
+        return'<div class="card" style="cursor:pointer;margin-bottom:8px;padding:14px" onclick="openDetailObj(allRows['+r.idx+'])">'
+          +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">'
+          +'<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--text);font-weight:600">'+r.incidencia+'</div>'
+          +'<div style="font-size:11px;color:var(--muted);margin-top:4px">'+r.fechaAveria+' · '+r.usuario+(r.responsable&&r.responsable!=='—'?' · asignado a '+r.responsable:'')+(solu&&r.fechaArreglo&&r.fechaArreglo!=='—'?' · arreglado '+r.fechaArreglo:'')+'</div></div>'
+          +'<span style="background:'+col+'22;color:'+col+';padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0">'+(r.estado||'—')+'</span>'
+          +'</div></div>';
+      }).join('')
+    : '<div style="color:var(--muted);text-align:center;padding:20px">Sin historial registrado para esta carretilla.</div>';
+
+  document.getElementById('content').innerHTML=
+    '<div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:26px">'
+    +getVehicleImg(carCode,110,80)
+    +'<div><div style="font-size:28px;font-weight:800;color:var(--light)">'+carCode+'</div>'
+    +'<span style="display:inline-block;margin-top:5px;padding:3px 11px;border-radius:5px;font-size:11px;font-weight:700;background:'+vColor+'22;color:'+vColor+'">'+vLabel+'</span></div>'
+    +'</div>'
+    +'<div class="section-title">Incidencias pendientes ('+pendientes.length+')</div>'+pendHtml
+    +'<div class="section-title" style="margin-top:28px">Historial completo ('+mine.length+')</div>'+histHtml;
+}
 function renderGrid(){
   var search=(document.getElementById('search').value||'').toLowerCase();
   var filtered=incidencias.filter(function(i){
@@ -358,13 +444,16 @@ function setFilter(f){
 
 var _detailOpen=false;
 function openDetail(id){
+  var item=incidencias.find(function(i){return i.id===id;});
+  openDetailObj(item);
+}
+function openDetailObj(item){
   if(_detailOpen)return;
   _detailOpen=true;
   setTimeout(function(){_detailOpen=false;},300);
-  var item=incidencias.find(function(i){return i.id===id;});
   if(!item)return;
   document.getElementById('d-num').textContent=vehicleLabel(item.carretilla).toUpperCase()+' '+item.carretilla;
-  document.getElementById('d-tipo').textContent=vehicleLabel(item.carretilla)+' · Incidencia pendiente';
+  document.getElementById('d-tipo').textContent=vehicleLabel(item.carretilla)+' · '+(item.estado||'');
   document.getElementById('d-svg').innerHTML=getVehicleImg(item.carretilla,180,130);
   var fc=item.prioridad.toLowerCase()==='alta'?'brightness(0) saturate(100%) invert(35%) sepia(90%) saturate(2000%) hue-rotate(340deg) brightness(120%)':item.prioridad.toLowerCase()==='media'?'brightness(0) saturate(100%) invert(75%) sepia(80%) saturate(800%) hue-rotate(5deg) brightness(110%)':item.prioridad.toLowerCase()==='baja'?'brightness(0) saturate(100%) invert(60%) sepia(80%) saturate(800%) hue-rotate(90deg) brightness(110%)':'brightness(0) invert(0.5)';
   document.getElementById('d-inc').textContent=item.incidencia;
@@ -374,6 +463,9 @@ function openDetail(id){
   document.getElementById('d-re').textContent=item.responsable;
   document.getElementById('d-pr').textContent=item.prioridad||'Sin prioridad';
   document.getElementById('d-es').textContent=item.estado;
+  var dav=document.getElementById('d-av');
+  dav.textContent=(item.avisadoJavier?'☑ Sí, avisado':'☐ No avisado');
+  dav.style.color=item.avisadoJavier?'#86efac':'#fca5a5';
   document.getElementById('d-ob').textContent=item.observaciones||'Sin observaciones';
   document.getElementById('overlay').classList.add('active');
 }
