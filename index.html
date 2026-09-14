@@ -367,10 +367,15 @@ function getVehicleImg(carretilla,w,h){
 function svgColor(p){p=(p||'').toLowerCase();if(p==='alta')return'#ef4444';if(p==='media')return'#f59e0b';if(p==='baja')return'#22c55e';return'#888';}
 function badgeClass(p){p=(p||'').toLowerCase();if(p==='alta')return'alta';if(p==='media')return'media';if(p==='baja')return'baja';return'sin';}
 
-function buildCard(item,delay){
+function buildCard(item,delay,mode){
   var col=svgColor(item.prioridad);
   var vc=vehicleColor(item.carretilla);
-  return '<div class="card" style="animation-delay:'+delay+'ms;border-color:'+col+';border-width:2px" onclick="openDetail('+item.id+')">'+
+  // mode='vehicle': la tarjeta abre la ficha completa del vehiculo (igual
+  // que al escanear su QR) en vez del panel de una sola incidencia. Se usa
+  // en el listado principal; dentro de la propia ficha las tarjetas de
+  // pendientes siguen abriendo el detalle simple (ya se ve el resto ahi).
+  var click=mode==='vehicle'?"goToVehicle('"+String(item.carretilla).replace(/'/g,"\\'")+"')":"openDetail("+item.id+")";
+  return '<div class="card" style="animation-delay:'+delay+'ms;border-color:'+col+';border-width:2px" onclick="'+click+'">'+
     '<div class="card-header">'+
       '<div><div class="carretilla-num"><span>'+vehicleLabel(item.carretilla).toUpperCase()+'</span>'+(item.carretilla||'?')+'</div>'+
       '<span style="display:inline-block;margin-top:5px;padding:2px 9px;border-radius:5px;font-size:10px;font-weight:700;background:'+vc+'22;color:'+vc+'">'+vehicleLabel(item.carretilla)+'</span></div>'+
@@ -449,7 +454,11 @@ function renderGrid(){
   });
   var grid=document.getElementById('grid');
   if(!filtered.length){grid.innerHTML='<div class="empty-state">Sin incidencias que coincidan</div>';return;}
-  grid.innerHTML=filtered.map(function(item,i){return buildCard(item,i*70);}).join('');
+  grid.innerHTML=filtered.map(function(item,i){return buildCard(item,i*70,'vehicle');}).join('');
+}
+
+function goToVehicle(code){
+  location.href='?carretilla='+encodeURIComponent(code);
 }
 
 function setFilter(f){
