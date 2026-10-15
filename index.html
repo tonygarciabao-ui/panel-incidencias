@@ -102,6 +102,63 @@
   .detail-obs label{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);display:block;margin-bottom:5px;}
   .detail-obs .val{font-size:12px;color:var(--muted);line-height:1.5;}
 
+  /* ===== Menú principal y vistas ===== */
+  .home{max-width:640px;margin:0 auto;}
+  .ck-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .ck-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 10px;text-decoration:none;color:var(--text);cursor:pointer;transition:filter .15s,transform .1s,border-color .15s;}
+  .ck-btn:hover{border-color:var(--blue);filter:brightness(1.08);}
+  .ck-btn:active{transform:scale(.97);}
+  .ck-btn.off{opacity:.45;cursor:default;}
+  .ck-btn.off:hover{border-color:var(--border);filter:none;}
+  .ck-btn.off:active{transform:none;}
+  .ck-photo{background:#f4f4f4;border-radius:10px;padding:8px;display:flex;justify-content:center;width:100%;}
+  .ck-photo img{display:block;height:62px;width:auto;max-width:100%;object-fit:contain;}
+  .ck-label{font-size:16px;font-weight:800;color:#f1f5f9;}
+  .ck-sub{font-size:11px;font-weight:600;color:var(--light);}
+  .row-btn{display:flex;align-items:center;gap:14px;width:100%;min-height:68px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:10px;color:var(--text);font:inherit;text-align:left;cursor:pointer;transition:filter .15s,transform .1s,border-color .15s;}
+  .row-btn:hover{border-color:var(--blue);filter:brightness(1.08);}
+  .row-btn:active{transform:scale(.985);}
+  .rb-ico{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .rb-ico.amber{background:rgba(245,158,11,.15);}
+  .rb-ico.blue{background:rgba(59,130,246,.15);}
+  .rb-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+  .rb-txt strong{font-size:15px;font-weight:700;color:#f1f5f9;}
+  .rb-txt small{font-size:11px;color:var(--muted);opacity:.8;line-height:1.35;}
+  .rb-num{min-width:42px;text-align:center;padding:4px 10px;border-radius:9px;font-size:20px;font-weight:800;color:var(--accent);background:rgba(239,68,68,.12);}
+  .rb-num.ok{color:var(--accent3);background:rgba(34,197,94,.12);}
+  .rb-arrow{font-size:22px;line-height:1;color:var(--muted);opacity:.55;}
+
+  .view-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .view-head h2{font-size:17px;font-weight:700;color:#f1f5f9;}
+  .view-head h2 span{color:var(--muted);opacity:.7;font-weight:600;}
+  .back-btn{background:var(--surface);border:1px solid var(--border);color:var(--light);border-radius:9px;padding:9px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:border-color .15s;}
+  .back-btn:hover{border-color:var(--blue);}
+  .finder{position:relative;margin-bottom:10px;}
+  .finder input{width:100%;height:42px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0 14px 0 38px;color:var(--text);font:inherit;font-size:14px;outline:none;transition:border-color .15s;}
+  .finder input:focus{border-color:var(--blue);}
+  .finder input::placeholder{color:var(--muted);opacity:.55;}
+  .finder .si{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.6;font-size:14px;pointer-events:none;}
+  .seg{display:flex;gap:6px;margin-bottom:18px;}
+  .seg button{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px 4px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:border-color .15s;}
+  .seg button.on{border-color:var(--blue);color:var(--light);background:rgba(30,58,95,.55);}
+  .seg button i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px;}
+  .hint{font-size:12px;color:var(--muted);opacity:.8;line-height:1.5;margin-bottom:12px;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;}
+  .chip{position:relative;min-width:64px;min-height:44px;padding:8px 16px;background:var(--surface);border:1px solid var(--c,var(--border));border-radius:10px;color:var(--light);font:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:filter .15s,transform .1s;}
+  .chip:hover{filter:brightness(1.2);}
+  .chip:active{transform:scale(.96);}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent2);}
+  .chip .dot{position:absolute;top:6px;right:6px;}
+  .legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);opacity:.75;margin-top:-8px;margin-bottom:30px;}
+  .data-error{margin:0 0 16px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5;color:#fecaca;}
+  .data-error[hidden]{display:none;}
+  @media(max-width:600px){
+    .ck-photo img{height:54px;}
+    .ck-label{font-size:15px;}
+    .view-head h2{font-size:15px;}
+    .seg button{font-size:11.5px;padding:9px 2px;}
+  }
+
   @media(max-width:600px){
     header{padding:14px 18px;}
     main{padding:18px 14px;}
@@ -114,7 +171,48 @@
     .toolbar{flex-direction:column;align-items:stretch;}
     .search-box{min-width:unset;}
   }
-  </style>
+    /* ===== Fichas nuevas: incidencia pendiente (.pc) y fila de historial (.hc) ===== */
+  .grid.wide{grid-template-columns:repeat(auto-fill,minmax(460px,1fr));}
+  .info-chip{background:#0f172a;border:1px solid #1e3a5f;border-radius:9px;padding:7px 13px 8px;min-width:0;}
+  .info-chip .il{display:block;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--light);white-space:nowrap;margin-bottom:2px;}
+  .info-chip .iv{display:block;font-size:14px;font-weight:700;color:#f8fafc;line-height:1.3;overflow-wrap:anywhere;}
+  .info-chip.ok{border-color:rgba(34,197,94,.45);}
+  .info-chip.ok .iv{color:#86efac;}
+  .info-chip.no .iv{color:#cbd5e1;}
+  .pc{padding:16px 18px 18px;}
+  .pc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .pc-main{flex:1;min-width:0;}
+  .pc-type{font-size:12px;font-weight:800;letter-spacing:1.6px;color:#e2e8f0;text-transform:uppercase;margin-bottom:6px;}
+  .pc-title{display:flex;align-items:center;gap:12px;}
+  .pc-code{font-size:26px;font-weight:800;color:var(--light);line-height:1.1;white-space:nowrap;}
+  .pc-text{flex:1;min-width:0;border-left:3px solid var(--accent2);padding-left:12px;font-size:17px;font-weight:600;color:#f8fafc;line-height:1.35;overflow-wrap:anywhere;}
+  .pc-info{display:flex;justify-content:space-between;align-items:stretch;gap:14px;margin-top:14px;}
+  .pc-chips{display:grid;grid-template-columns:repeat(2,auto);gap:8px;justify-content:start;}
+  .pc-side{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;gap:10px;}
+  .st{font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;}
+  .sdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;}
+  .hc{padding:14px 16px 16px;margin-bottom:10px;cursor:pointer;}
+  .hc-top{display:flex;align-items:center;gap:12px;}
+  .hc-code{font-size:15px;font-weight:800;color:var(--light);background:#0f172a;border-radius:7px;padding:4px 10px;white-space:nowrap;}
+  .hc-text{flex:1;min-width:0;border-left:3px solid var(--accent2);padding-left:12px;font-size:15px;font-weight:600;color:#f8fafc;line-height:1.35;overflow-wrap:anywhere;}
+  .hc-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  @media(max-width:600px){
+    .grid.wide{grid-template-columns:1fr;}
+    .pc{padding:14px 14px 16px;}
+    .pc-code{font-size:24px;}
+    .pc-text{font-size:16px;}
+    .pc-info{flex-direction:column;gap:10px;}
+    .pc-chips{grid-template-columns:1fr 1fr;}
+    .pc-side{flex-direction:row;align-items:center;}
+    .info-chip .iv{font-size:14px;}
+    .hc{padding:12px 14px 14px;}
+    .hc-top{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"code badge" "text text";gap:10px 8px;}
+    .hc-code{grid-area:code;justify-self:start;}
+    .hc-text{grid-area:text;font-size:15px;}
+    .hc-st{grid-area:badge;justify-self:end;}
+    .hc-chips{display:grid;grid-template-columns:1fr 1fr;}
+  }
+</style>
 </head>
 <body>
 <header>
@@ -147,18 +245,8 @@
       <button class="dismiss" onclick="dismissInstallBanner()">✕</button>
     </div>
   </div>
-  <div class="toolbar" id="toolbar">
-    <div class="search-box">
-      <span class="si">🔍</span>
-      <input type="text" id="search" placeholder="Buscar carretilla, usuario o incidencia…" oninput="renderGrid()">
-    </div>
-    <button class="filter-btn active" id="btn-all" onclick="setFilter('all')">🚜 Todas</button>
-    <button class="filter-btn" id="btn-alta" onclick="setFilter('Alta')">🔴 Alta</button>
-    <button class="filter-btn" id="btn-media" onclick="setFilter('Media')">🟡 Media</button>
-    <button class="filter-btn" id="btn-baja" onclick="setFilter('Baja')">🟢 Baja</button>
-  </div>
-  <div class="section-title" id="section-title-all">Carretillas con incidencias pendientes</div>
-  <div class="grid" id="grid"></div>
+  <div class="data-error" id="data-error" hidden></div>
+  <div id="view"></div>
 </main>
 <div class="overlay" id="overlay" onclick="closeDetail(event)">
   <div class="detail-panel">
@@ -302,8 +390,7 @@ async function loadData(){
       // Si la URL trae ?carretilla=CODIGO (por ejemplo, al escanear el QR
       // pegado en una carretilla concreta), se muestra su ficha completa en
       // vez del listado general de toda la flota.
-      var urlCar=new URLSearchParams(location.search).get('carretilla');
-      if(urlCar){renderVehiclePage(urlCar);}else{renderGrid();}
+      loaded=true;hideError();updateView();
       updateSyncInfo(true);
     }catch(renderErr){
       // Un fallo aqui es un bug pintando la pagina, NO un problema de
@@ -320,14 +407,32 @@ async function loadData(){
   }
 }
 
+// El aviso de error va FUERA de las vistas: así, si falla el flujo de Power Automate,
+// el menú y los botones de checklist (que no dependen de él) siguen funcionando.
 function showError(title,hint,raw){
-  document.getElementById('grid').innerHTML='<div class="empty-state">❌ '+title+'<br><span style="font-size:11px">'+hint+'</span>'+(raw?'<pre style="text-align:left;background:#0f172a;padding:10px;border-radius:8px;font-size:10px;overflow-x:auto;margin-top:10px;white-space:pre-wrap;word-break:break-all">'+String(raw).slice(0,1200).replace(/</g,'&lt;')+'</pre>':'')+'</div>';
+  loadError=true;
+  var el=document.getElementById('data-error');
+  if(el){
+    el.innerHTML='❌ <strong>'+title+'</strong><br><span style="font-size:11px">'+hint+'</span>'
+      +(raw?'<pre style="text-align:left;background:#0f172a;padding:10px;border-radius:8px;font-size:10px;overflow-x:auto;margin-top:10px;white-space:pre-wrap;word-break:break-all">'+String(raw).slice(0,1200).replace(/</g,'&lt;')+'</pre>':'')
+      +'<br><button class="back-btn" style="margin-top:10px" onclick="loadData()">Reintentar</button>';
+    el.hidden=false;
+  }
+  updateView();
+}
+function hideError(){
+  loadError=false;
+  var el=document.getElementById('data-error');
+  if(el){el.hidden=true;el.innerHTML='';}
 }
 
 function updateSyncInfo(ok){
   var now=new Date().toLocaleString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  var extra=(ok&&lastTotalRows!==null)?' · '+lastTotalRows+' filas recibidas':'';
-  document.getElementById('fecha-gen').textContent=now+extra;
+  var el=document.getElementById('fecha-gen');
+  el.textContent=now;
+  // Diagnóstico discreto (ya no ocupa sitio en pantalla): filas que devolvió el flujo.
+  // Si Power Automate vuelve a recortar datos, este número deja de cuadrar con el Excel.
+  el.title=(ok&&lastTotalRows!==null)?lastTotalRows+' filas recibidas del servidor':'';
   var dot=document.getElementById('live-dot');
   if(dot)dot.style.background=ok?'var(--accent3)':'var(--accent)';
 }
@@ -379,31 +484,36 @@ function getVehicleImg(carretilla,w,h){
 function svgColor(p){p=(p||'').toLowerCase();if(p==='alta')return'#ef4444';if(p==='media')return'#f59e0b';if(p==='baja')return'#22c55e';return'#888';}
 function badgeClass(p){p=(p||'').toLowerCase();if(p==='alta')return'alta';if(p==='media')return'media';if(p==='baja')return'baja';return'sin';}
 
+function infoChip(icon,label,value,cls){
+  return '<div class="info-chip'+(cls?' '+cls:'')+'"><span class="il">'+icon+' '+label+'</span><span class="iv">'+value+'</span></div>';
+}
 function buildCard(item,delay,mode){
   var col=svgColor(item.prioridad);
-  var vc=vehicleColor(item.carretilla);
   // mode='vehicle': la tarjeta abre la ficha completa del vehiculo (igual
   // que al escanear su QR) en vez del panel de una sola incidencia. Se usa
-  // en el listado principal; dentro de la propia ficha las tarjetas de
+  // en el listado de pendientes; dentro de la propia ficha las tarjetas de
   // pendientes siguen abriendo el detalle simple (ya se ve el resto ahi).
   var click=mode==='vehicle'?"goToVehicle('"+String(item.carretilla).replace(/'/g,"\\'")+"')":"openDetail("+item.id+")";
-  return '<div class="card" style="animation-delay:'+delay+'ms;border-color:'+col+';border-width:2px" onclick="'+click+'">'+
-    '<div class="card-header">'+
-      '<div><div class="carretilla-num"><span>'+vehicleLabel(item.carretilla).toUpperCase()+'</span>'+(item.carretilla||'?')+'</div>'+
-      '<span style="display:inline-block;margin-top:5px;padding:2px 9px;border-radius:5px;font-size:10px;font-weight:700;background:'+vc+'22;color:'+vc+'">'+vehicleLabel(item.carretilla)+'</span></div>'+
-      '<div class="badge-prioridad '+badgeClass(item.prioridad)+'">'+(item.prioridad||'Sin prioridad')+'</div>'+
-    '</div>'+
-    '<div class="card-body">'+
-      '<div class="incidencia-text">'+item.incidencia+'</div>'+
-      '<div class="meta-row">'+
-        '<div class="meta-chip">📅 <strong>'+item.fechaAveria+'</strong></div>'+
-        '<div class="meta-chip">📣 <strong>'+item.fechaAviso+'</strong></div>'+
-        '<div class="meta-chip" style="'+(item.avisadoJavier?'border-color:#22c55e55;color:#86efac':'border-color:#94a3b855')+'">'+(item.avisadoJavier?'☑':'☐')+' <strong>'+(item.avisadoJavier?'Avisado a Javier':'Javier sin avisar')+'</strong></div>'+
+  var resp=item.responsable&&item.responsable!=='—'?esc(item.responsable):'Sin asignar';
+  return '<div class="card pc" style="animation-delay:'+delay+'ms;border-color:'+col+';border-width:2px" onclick="'+click+'">'+
+    '<div class="pc-top">'+
+      '<div class="pc-main">'+
+        '<div class="pc-type">'+esc(vehicleLabel(item.carretilla))+'</div>'+
+        '<div class="pc-title"><span class="pc-code">'+esc(item.carretilla||'?')+'</span><span class="pc-text">'+esc(item.incidencia)+'</span></div>'+
       '</div>'+
+      '<div class="badge-prioridad '+badgeClass(item.prioridad)+'">'+esc(item.prioridad||'Sin prioridad')+'</div>'+
     '</div>'+
-    '<div class="card-footer">'+
-      '<div class="estado-pendiente">⬤ '+item.estado+'</div>'+
-      '<div class="usuario">👤 '+item.usuario+'</div>'+
+    '<div class="pc-info">'+
+      '<div class="pc-chips">'+
+        infoChip('📅','Fecha avería',esc(item.fechaAveria))+
+        infoChip('📣','Fecha aviso',esc(item.fechaAviso))+
+        infoChip('👤','Usuario',esc(item.usuario))+
+        infoChip('🔧','Responsable',resp)+
+      '</div>'+
+      '<div class="pc-side">'+
+        infoChip('📞','Aviso a Javier',item.avisadoJavier?'☑ Sí, avisado':'☐ Sin avisar',item.avisadoJavier?'ok':'no')+
+        '<div class="st" style="color:var(--accent2)"><i class="sdot" style="background:var(--accent2)"></i>'+esc(item.estado)+'</div>'+
+      '</div>'+
     '</div>'+
   '</div>';
 }
@@ -413,8 +523,6 @@ function buildCard(item,delay,mode){
 // pendiente (o un aviso claro de que no hay nada pendiente) y despues el
 // historial completo, incluidas las ya solucionadas.
 function renderVehiclePage(carCodeRaw){
-  var toolbar=document.getElementById('toolbar');if(toolbar)toolbar.style.display='none';
-  var sectionAll=document.getElementById('section-title-all');if(sectionAll)sectionAll.style.display='none';
   var carCode=String(carCodeRaw||'').trim();
   var carUp=carCode.toUpperCase();
   var mine=allRows.filter(function(r){return String(r.carretilla).trim().toUpperCase()===carUp;});
@@ -423,7 +531,7 @@ function renderVehiclePage(carCodeRaw){
 
   var vLabel=vehicleLabel(carCode),vColor=vehicleColor(carCode);
   var pendHtml=pendientes.length
-    ? '<div class="grid">'+pendientes.map(function(item,i){return buildCard(item,i*40);}).join('')+'</div>'
+    ? '<div class="grid wide">'+pendientes.map(function(item,i){return buildCard(item,i*40);}).join('')+'</div>'
     : '<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:18px;text-align:center;color:#86efac;font-weight:700">✅ Sin incidencias pendientes</div>';
 
   var histHtml=mine.length
@@ -431,24 +539,24 @@ function renderVehiclePage(carCodeRaw){
         var pend=r.estado.toLowerCase().trim()==='pendiente';
         var solu=r.estado.toLowerCase().indexOf('solucion')>=0;
         var col=pend?'#f59e0b':(solu?'#22c55e':'#94a3b8');
-        return'<div class="card" style="cursor:pointer;margin-bottom:8px;padding:14px" onclick="openDetailObj(allRows['+r.idx+'])">'
-          +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">'
-          +'<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--text);font-weight:600">'+r.incidencia+'</div>'
-          +'<div style="font-size:11px;color:var(--muted);margin-top:4px">'+r.fechaAveria+' · '+r.usuario+(r.responsable&&r.responsable!=='—'?' · asignado a '+r.responsable:'')+(solu&&r.fechaArreglo&&r.fechaArreglo!=='—'?' · arreglado '+r.fechaArreglo:'')+'</div></div>'
-          +'<span style="background:'+col+'22;color:'+col+';padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0">'+(r.estado||'—')+'</span>'
+        var resp=r.responsable&&r.responsable!=='—'?esc(r.responsable):'Sin asignar';
+        return'<div class="card hc" style="border:1px solid '+col+'66" onclick="openDetailObj(allRows['+r.idx+'])">'
+          +'<div class="hc-top"><span class="hc-code">'+esc(carCode)+'</span>'
+          +'<span class="hc-text" style="border-left-color:'+col+'">'+esc(r.incidencia)+'</span>'
+          +'<span class="st hc-st" style="color:'+col+'"><i class="sdot" style="background:'+col+'"></i>'+esc(r.estado||'—')+'</span></div>'
+          +'<div class="hc-chips">'
+          +infoChip('📅','Fecha avería',esc(r.fechaAveria))
+          +infoChip('👤','Usuario',esc(r.usuario))
+          +infoChip('🔧','Responsable',resp)
+          +(solu&&r.fechaArreglo&&r.fechaArreglo!=='—'?infoChip('✅','Arreglada',esc(r.fechaArreglo),'ok'):'')
           +'</div></div>';
       }).join('')
     : '<div style="color:var(--muted);text-align:center;padding:20px">Sin historial registrado para esta carretilla.</div>';
 
-  var container=document.getElementById('grid');
+  var container=document.getElementById('view');
   if(!container)return;
-  // #grid trae "display:grid" pensado para colocar tarjetas en columnas.
-  // Para la ficha de vehiculo se anula aqui (solo aqui), y las tarjetas de
-  // pendientes recuperan su propia cuadricula interna mas abajo (pendHtml
-  // ya las envuelve en su propio div.grid).
-  container.style.display='block';
-  container.innerHTML=
-    '<button class="filter-btn" onclick="location.href=location.pathname" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:18px">← Menú principal</button>'
+  var html=
+    backButtonHtml()
     +'<div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:26px">'
     +getVehicleImg(carCode,110,80)
     +'<div><div style="font-size:28px;font-weight:800;color:var(--light)">'+carCode+'</div>'
@@ -456,28 +564,208 @@ function renderVehiclePage(carCodeRaw){
     +'</div>'
     +'<div class="section-title">Incidencias pendientes ('+pendientes.length+')</div>'+pendHtml
     +'<div class="section-title" style="margin-top:28px">Historial completo ('+mine.length+')</div>'+histHtml;
+  setHtml(container,html);
 }
-function renderGrid(){
-  var search=(document.getElementById('search').value||'').toLowerCase();
-  var filtered=incidencias.filter(function(i){
-    var mf=activeFilter==='all'||(i.prioridad||'').toLowerCase()===activeFilter.toLowerCase();
-    var ms=!search||(i.carretilla||'').toLowerCase().includes(search)||(i.usuario||'').toLowerCase().includes(search)||(i.incidencia||'').toLowerCase().includes(search);
-    return mf&&ms;
-  });
-  var grid=document.getElementById('grid');
-  if(!filtered.length){grid.innerHTML='<div class="empty-state">Sin incidencias que coincidan</div>';return;}
-  grid.innerHTML=filtered.map(function(item,i){return buildCard(item,i*70,'vehicle');}).join('');
+/* ===================== MENÚ PRINCIPAL Y VISTAS ===================== */
+// Enlaces de los formularios de checklist (Microsoft Forms; piden la cuenta de la empresa).
+// Para activar el botón de transpalés, pega su enlace entre las comillas de la segunda línea.
+var CHECKLIST_CARRETILLAS_URL='https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=175JTNqFDEevw3c1s3GjQ0M-8VP0EbxGi9q_0bVyxs1UNjgxN1YwN1o1M1NCOVNIV1g5RlBVWFREQSQlQCN0PWcu';
+var CHECKLIST_TRANSPALES_URL='';
+
+var loaded=false;      // true cuando ya llegaron datos del flujo al menos una vez
+var loadError=false;   // true mientras el último intento de carga haya fallado
+var query='';          // texto del buscador de la vista actual
+var renderedKey=null;  // vista pintada ahora mismo (para no reconstruirla en cada refresco)
+var GROUPS=[['carretilla','Carretillas'],['transpale','Transpalés'],['apilador','Apiladores'],['bateria','Cambio de batería'],['generico','Otros']];
+
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+// Solo toca el DOM si el HTML ha cambiado: evita repetir animaciones y saltos en cada refresco de 60 s.
+function setHtml(el,html){
+  if(!el||el.__html===html)return;
+  el.__html=html;
+  el.innerHTML=html;
 }
 
+// --- Rutas: menú (sin nada), #pendientes, #historial, y ?carretilla=CODIGO (ficha, también la del QR) ---
+function currentRoute(){
+  var car=new URLSearchParams(location.search).get('carretilla');
+  if(car)return{view:'ficha',car:car};
+  var h=location.hash.replace('#','');
+  if(h==='pendientes'||h==='historial')return{view:h};
+  return{view:'home'};
+}
+function go(v){
+  history.pushState({v:v},'','#'+v);
+  renderView();
+  window.scrollTo(0,0);
+}
+function goHome(){
+  if(history.state&&history.state.v){history.back();return;}
+  history.replaceState(null,'',location.pathname);
+  renderView();
+  window.scrollTo(0,0);
+}
+function cameFromApp(){
+  try{return !!document.referrer&&new URL(document.referrer).origin===location.origin;}catch(e){return false;}
+}
+function goBack(){
+  if(cameFromApp()){history.back();}else{location.href=location.pathname;}
+}
+function backButtonHtml(){
+  return '<button class="back-btn" data-act="back" style="margin-bottom:16px">'+(cameFromApp()?'← Volver':'← Menú principal')+'</button>';
+}
 function goToVehicle(code){
   location.href='?carretilla='+encodeURIComponent(code);
 }
 
+// --- Menú principal ---
+function checklistBtn(url,label,img){
+  var inner='<span class="ck-photo"><img src="'+img+'" alt=""></span><span class="ck-label">'+label+'</span><span class="ck-sub">'+(url?'Abrir formulario ↗':'Enlace pendiente')+'</span>';
+  return url
+    ?'<a class="ck-btn" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+inner+'</a>'
+    :'<span class="ck-btn off" aria-disabled="true">'+inner+'</span>';
+}
+function homeHtml(){
+  return '<div class="home">'
+    +'<div class="section-title">Checklist</div>'
+    +'<div class="ck-row">'+checklistBtn(CHECKLIST_CARRETILLAS_URL,'Carretillas',IMG_FORKLIFT)+checklistBtn(CHECKLIST_TRANSPALES_URL,'Transpalés',IMG_TRANSPALETA)+'</div>'
+    +'<div class="section-title" style="margin-top:26px">Incidencias</div>'
+    +'<button class="row-btn" data-go="pendientes"><span class="rb-ico amber">⚠️</span><span class="rb-txt"><strong>Incidencias pendientes</strong><small id="home-pend-sub">Cargando…</small></span><span class="rb-num" id="home-pend-num">…</span><span class="rb-arrow">›</span></button>'
+    +'<button class="row-btn" data-go="historial"><span class="rb-ico blue">🕘</span><span class="rb-txt"><strong>Historial de un equipo</strong><small>Carretillas y transpalés, aunque no tengan incidencias ahora</small></span><span class="rb-arrow">›</span></button>'
+    +'</div>';
+}
+function updateHome(){
+  var n=$('home-pend-num'),sub=$('home-pend-sub');
+  if(!n||!sub)return;
+  if(!loaded){
+    n.textContent='–';n.className='rb-num';
+    sub.textContent=loadError?'No se han podido cargar los datos':'Cargando…';
+    return;
+  }
+  var total=incidencias.length;
+  var alta=incidencias.filter(function(i){return(i.prioridad||'').toUpperCase()==='ALTA';}).length;
+  n.textContent=total;
+  n.className='rb-num'+(total?'':' ok');
+  sub.textContent=total?(alta?alta+' de prioridad alta':'Ninguna de prioridad alta'):'Todo al día';
+}
+
+// --- Incidencias pendientes ---
+function pendientesShell(){
+  return '<div class="view-head"><button class="back-btn" data-act="home">← Menú</button><h2>Incidencias pendientes <span id="pend-total"></span></h2></div>'
+    +'<div class="finder"><span class="si">🔍</span><input id="q" type="text" autocomplete="off" placeholder="Buscar carretilla, usuario o texto…" oninput="onQuery(this.value)"></div>'
+    +'<div class="seg" id="seg">'
+    +'<button class="on" data-f="all">Todas</button>'
+    +'<button data-f="Alta"><i style="background:#ef4444"></i>Alta</button>'
+    +'<button data-f="Media"><i style="background:#f59e0b"></i>Media</button>'
+    +'<button data-f="Baja"><i style="background:#22c55e"></i>Baja</button>'
+    +'</div>'
+    +'<div class="grid wide" id="res"></div>';
+}
+function updatePendientes(){
+  var res=$('res');if(!res)return;
+  var tot=$('pend-total');if(tot)tot.textContent=loaded?'('+incidencias.length+')':'';
+  if(!loaded){setHtml(res,'<div class="empty-state">'+(loadError?'Sin datos todavía':'⏳ Cargando datos…')+'</div>');return;}
+  var s=query.toLowerCase().trim();
+  var filtered=incidencias.filter(function(i){
+    var mf=activeFilter==='all'||(i.prioridad||'').toLowerCase()===activeFilter.toLowerCase();
+    var ms=!s||(i.carretilla||'').toLowerCase().includes(s)||(i.usuario||'').toLowerCase().includes(s)||(i.incidencia||'').toLowerCase().includes(s);
+    return mf&&ms;
+  });
+  if(!filtered.length){
+    setHtml(res,'<div class="empty-state">'+(incidencias.length?'Sin incidencias que coincidan':'✅ No hay incidencias pendientes')+'</div>');
+    return;
+  }
+  setHtml(res,filtered.map(function(item,i){return buildCard(item,Math.min(i,8)*50,'vehicle');}).join(''));
+}
 function setFilter(f){
   activeFilter=f;
-  ['all','alta','media','baja'].forEach(function(k){var el=document.getElementById('btn-'+k);if(el)el.classList.remove('active');});
-  var t=document.getElementById('btn-'+f.toLowerCase());if(t)t.classList.add('active');
-  renderGrid();
+  var seg=$('seg');
+  if(seg)Array.prototype.forEach.call(seg.querySelectorAll('button'),function(b){b.classList.toggle('on',b.getAttribute('data-f')===f);});
+  updatePendientes();
+}
+
+// --- Historial de un equipo: todos los equipos que aparecen en el Excel, tengan o no incidencias ahora ---
+function historialShell(){
+  return '<div class="view-head"><button class="back-btn" data-act="home">← Menú</button><h2>Historial de un equipo</h2></div>'
+    +'<p class="hint">Elige una carretilla o un transpalé para ver todo su historial, aunque ahora no tenga incidencias.</p>'
+    +'<div class="finder"><span class="si">🔍</span><input id="q" type="text" autocomplete="off" placeholder="Buscar por código…" oninput="onQuery(this.value)"></div>'
+    +'<div id="res"></div>';
+}
+function equipmentIndex(){
+  var map=Object.create(null);
+  allRows.forEach(function(r){
+    var raw=String(r.carretilla==null?'':r.carretilla).trim();
+    if(!raw||raw==='?'||raw==='—')return;
+    var k=raw.toUpperCase();
+    var e=map[k]||(map[k]={code:raw,type:vehicleType(raw),pend:0});
+    if(String(r.estado).toLowerCase().trim()==='pendiente')e.pend++;
+  });
+  return Object.keys(map).map(function(k){return map[k];});
+}
+function updateHistorial(){
+  var res=$('res');if(!res)return;
+  if(!loaded){setHtml(res,'<div class="empty-state">'+(loadError?'Sin datos todavía':'⏳ Cargando datos…')+'</div>');return;}
+  var s=query.trim().toUpperCase();
+  var list=equipmentIndex().filter(function(e){return !s||e.code.toUpperCase().indexOf(s)>=0;});
+  list.sort(function(a,b){return a.code.localeCompare(b.code,'es',{numeric:true});});
+  if(!list.length){
+    setHtml(res,'<div class="empty-state">'+(s?'Ningún equipo coincide con «'+esc(query.trim())+'»':'Todavía no hay equipos registrados')+'</div>');
+    return;
+  }
+  var html='';
+  GROUPS.forEach(function(g){
+    var items=list.filter(function(e){return e.type===g[0];});
+    if(!items.length)return;
+    html+='<div class="section-title">'+g[1]+' ('+items.length+')</div><div class="chips">'
+      +items.map(function(e){
+        return '<button class="chip" style="--c:'+vehicleColor(e.code)+'" data-car="'+esc(e.code)+'">'+esc(e.code)+(e.pend?'<i class="dot" title="Con incidencias pendientes"></i>':'')+'</button>';
+      }).join('')
+      +'</div>';
+  });
+  html+='<div class="legend"><i class="dot"></i> con incidencias pendientes ahora</div>';
+  setHtml(res,html);
+}
+
+// --- Ficha de un equipo (la de siempre: se abre desde una tarjeta, desde el historial o escaneando el QR) ---
+function updateFicha(car){
+  if(!loaded){setHtml($('view'),backButtonHtml()+'<div class="empty-state">'+(loadError?'Sin datos todavía':'⏳ Cargando datos…')+'</div>');return;}
+  renderVehiclePage(car);
+}
+
+// --- Control general ---
+function buildShell(view){
+  var v=$('view');
+  if(view==='home')setHtml(v,homeHtml());
+  else if(view==='pendientes')setHtml(v,pendientesShell());
+  else if(view==='historial')setHtml(v,historialShell());
+  else setHtml(v,'');
+}
+function updateView(){
+  var r=currentRoute();
+  if(r.view==='home')updateHome();
+  else if(r.view==='pendientes')updatePendientes();
+  else if(r.view==='historial')updateHistorial();
+  else updateFicha(r.car);
+}
+function renderView(){
+  var r=currentRoute();
+  var key=r.view+(r.car?':'+r.car:'');
+  if(key!==renderedKey){
+    renderedKey=key;query='';activeFilter='all';
+    buildShell(r.view);
+  }
+  updateView();
+}
+function onQuery(v){query=v;updateView();}
+function onViewClick(e){
+  var el=e.target.closest?e.target.closest('[data-go],[data-car],[data-f],[data-act]'):null;
+  if(!el)return;
+  if(el.hasAttribute('data-car'))goToVehicle(el.getAttribute('data-car'));
+  else if(el.hasAttribute('data-go'))go(el.getAttribute('data-go'));
+  else if(el.hasAttribute('data-f'))setFilter(el.getAttribute('data-f'));
+  else if(el.getAttribute('data-act')==='home')goHome();
+  else if(el.getAttribute('data-act')==='back')goBack();
 }
 
 var _detailOpen=false;
@@ -547,6 +835,9 @@ if('serviceWorker' in navigator){
   });
 }
 
+$('view').addEventListener('click',onViewClick);
+window.addEventListener('popstate',renderView);
+renderView();
 loadData();
 setInterval(loadData, 60000);
 </script>
