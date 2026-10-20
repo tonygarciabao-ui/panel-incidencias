@@ -191,11 +191,25 @@
   .pc-side{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;gap:10px;}
   .st{font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;}
   .sdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;}
-  .hc{padding:14px 16px 16px;margin-bottom:10px;cursor:pointer;}
-  .hc-top{display:flex;align-items:center;gap:12px;}
+  .hc{padding:9px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;}
+  .hc .info-chip{padding:4px 10px 5px;}
+  .hc .info-chip .iv{font-size:13px;}
+  .hc-date{display:none;}
+  .hc-chips{order:2;}
+  .hc-st{order:3;margin-left:auto;}
+  .hc-top{display:contents;}
   .hc-code{font-size:15px;font-weight:800;color:var(--light);background:#0f172a;border-radius:7px;padding:4px 10px;white-space:nowrap;}
-  .hc-text{flex:1;min-width:0;border-left:3px solid var(--accent2);padding-left:12px;font-size:15px;font-weight:600;color:#f8fafc;line-height:1.35;overflow-wrap:anywhere;}
-  .hc-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .hc-text{flex:0 1 300px;min-width:140px;max-width:30%;border-left:3px solid var(--accent2);padding-left:12px;font-size:15px;font-weight:600;color:#f8fafc;line-height:1.35;overflow-wrap:anywhere;}
+  .hc-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  @media(max-width:1099px){
+    .hc{display:block;padding:11px 14px 13px;margin-bottom:10px;}
+    .hc-top{display:flex;align-items:center;gap:12px;}
+    .hc-text{flex:1;max-width:none;}
+    .hc-st{margin-left:0;}
+    .hc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+    .hc .info-chip{padding:5px 10px 6px;}
+    .hc .info-chip .iv{font-size:13px;}
+  }
   @media(max-width:600px){
     .grid.wide{grid-template-columns:1fr;}
     .pc{padding:14px 14px 16px;}
@@ -205,18 +219,25 @@
     .pc-chips{grid-template-columns:1fr 1fr;}
     .pc-side{flex-direction:row;align-items:center;}
     .info-chip .iv{font-size:14px;}
-    .hc{padding:12px 14px 14px;}
+    .hc{display:block;padding:12px 14px 14px;margin-bottom:10px;}
     .hc-top{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"code badge" "text text";gap:10px 8px;}
     .hc-code{grid-area:code;justify-self:start;}
-    .hc-text{grid-area:text;font-size:15px;}
+    .hc-text{grid-area:text;font-size:15px;max-width:none;}
     .hc-st{grid-area:badge;justify-self:end;}
-    .hc-chips{display:grid;grid-template-columns:1fr 1fr;}
   }
   .chip.p{border-width:2px;}
   .chip .cnt{position:absolute;top:-8px;right:-8px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--c);color:#0f172a;font-size:11px;font-weight:800;line-height:20px;text-align:center;}
   .legend.keys{flex-wrap:wrap;gap:6px 14px;margin-top:0;}
   .legend.keys span{display:inline-flex;align-items:center;gap:6px;}
   .legend.keys .dot{width:10px;height:10px;}
+  @media(max-width:600px){
+    .hc{padding:10px 12px;margin-bottom:8px;}
+    .hc-top{display:flex;align-items:center;gap:10px;}
+    .hc-code,.hc-st,.hc-chips{display:none;}
+    .hc-text{flex:1;font-size:14px;padding-left:10px;}
+    .hc-date{display:block;flex-shrink:0;font-size:13px;font-weight:700;color:#e2e8f0;white-space:nowrap;}
+    .hc-date .sdot{margin-right:6px;}
+  }
 </style>
 </head>
 <body>
@@ -548,7 +569,8 @@ function renderVehiclePage(carCodeRaw){
         return'<div class="card hc" style="border:1px solid '+col+'66" onclick="openDetailObj(allRows['+r.idx+'])">'
           +'<div class="hc-top"><span class="hc-code">'+esc(carCode)+'</span>'
           +'<span class="hc-text" style="border-left-color:'+col+'">'+esc(r.incidencia)+'</span>'
-          +'<span class="st hc-st" style="color:'+col+'"><i class="sdot" style="background:'+col+'"></i>'+esc(r.estado||'—')+'</span></div>'
+          +'<span class="st hc-st" style="color:'+col+'"><i class="sdot" style="background:'+col+'"></i>'+esc(r.estado||'—')+'</span>'
+          +'<span class="hc-date" title="'+esc(r.estado||'')+'"><i class="sdot" style="background:'+col+'"></i>'+esc(r.fechaAveria)+'</span></div>'
           +'<div class="hc-chips">'
           +infoChip('📅','Fecha avería',esc(r.fechaAveria))
           +infoChip('👤','Usuario',esc(r.usuario))
