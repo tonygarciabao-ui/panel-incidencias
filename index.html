@@ -552,7 +552,14 @@ function renderVehiclePage(carCodeRaw){
   var carCode=String(carCodeRaw||'').trim();
   var carUp=carCode.toUpperCase();
   var mine=allRows.filter(function(r){return String(r.carretilla).trim().toUpperCase()===carUp;});
-  mine.sort(function(a,b){return(b.fechaAveriaRaw||0)-(a.fechaAveriaRaw||0);});
+  // Primero las pendientes y despues el resto (solucionadas...); dentro de cada grupo,
+  // la mas reciente arriba (por fecha de averia; a igualdad, la fila mas abajo del Excel).
+  function isPend(r){return String(r.estado).toLowerCase().trim()==='pendiente';}
+  mine.sort(function(a,b){
+    var pa=isPend(a)?0:1,pb=isPend(b)?0:1;
+    if(pa!==pb)return pa-pb;
+    return((b.fechaAveriaRaw||0)-(a.fechaAveriaRaw||0))||(b.idx-a.idx);
+  });
   var pendientes=incidencias.filter(function(i){return String(i.carretilla).trim().toUpperCase()===carUp;});
 
   var vLabel=vehicleLabel(carCode),vColor=vehicleColor(carCode);
