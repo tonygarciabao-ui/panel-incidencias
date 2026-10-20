@@ -212,6 +212,11 @@
     .hc-st{grid-area:badge;justify-self:end;}
     .hc-chips{display:grid;grid-template-columns:1fr 1fr;}
   }
+  .chip.p{border-width:2px;}
+  .chip .cnt{position:absolute;top:-8px;right:-8px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--c);color:#0f172a;font-size:11px;font-weight:800;line-height:20px;text-align:center;}
+  .legend.keys{flex-wrap:wrap;gap:6px 14px;margin-top:0;}
+  .legend.keys span{display:inline-flex;align-items:center;gap:6px;}
+  .legend.keys .dot{width:10px;height:10px;}
 </style>
 </head>
 <body>
@@ -660,7 +665,7 @@ function pendientesShell(){
     +'<button data-f="Media"><i style="background:#f59e0b"></i>Media</button>'
     +'<button data-f="Baja"><i style="background:#22c55e"></i>Baja</button>'
     +'</div>'
-    +'<div class="grid wide" id="res"></div>';
+    +'<div id="res"></div>';
 }
 function updatePendientes(){
   var res=$('res');if(!res)return;
@@ -676,7 +681,34 @@ function updatePendientes(){
     setHtml(res,'<div class="empty-state">'+(incidencias.length?'Sin incidencias que coincidan':'✅ No hay incidencias pendientes')+'</div>');
     return;
   }
-  setHtml(res,filtered.map(function(item,i){return buildCard(item,Math.min(i,8)*50,'vehicle');}).join(''));
+  // Un botón por equipo (no una tarjeta por incidencia): el color es la prioridad
+  // más alta que tenga y el número, cuántas incidencias pendientes acumula.
+  var RANK={alta:3,media:2,baja:1};
+  var map=Object.create(null);
+  filtered.forEach(function(i){
+    var raw=String(i.carretilla==null?'':i.carretilla).trim()||'?';
+    var k=raw.toUpperCase();
+    var e=map[k]||(map[k]={code:raw,type:vehicleType(raw),n:0,rank:0});
+    e.n++;
+    var r=RANK[(i.prioridad||'').toLowerCase()]||0;
+    if(r>e.rank)e.rank=r;
+  });
+  var list=Object.keys(map).map(function(k){return map[k];});
+  list.sort(function(a,b){return a.code.localeCompare(b.code,'es',{numeric:true});});
+  var COL={3:'#ef4444',2:'#f59e0b',1:'#22c55e',0:'#94a3b8'};
+  var html='';
+  GROUPS.forEach(function(g){
+    var items=list.filter(function(e){return e.type===g[0];});
+    if(!items.length)return;
+    html+='<div class="section-title">'+g[1]+' ('+items.length+')</div><div class="chips">'
+      +items.map(function(e){
+        return '<button class="chip p" style="--c:'+COL[e.rank]+'" data-car="'+esc(e.code)+'">'+esc(e.code)+(e.n>1?'<span class="cnt">'+e.n+'</span>':'')+'</button>';
+      }).join('')
+      +'</div>';
+  });
+  html+='<div class="legend keys"><span><i class="dot" style="background:#ef4444"></i>Alta</span><span><i class="dot" style="background:#f59e0b"></i>Media</span><span><i class="dot" style="background:#22c55e"></i>Baja</span><span style="flex-basis:100%">El borde marca la prioridad más alta del equipo; el número, cuántas incidencias tiene.</span></div>';
+  html+='';
+  setHtml(res,html);
 }
 function setFilter(f){
   activeFilter=f;
