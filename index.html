@@ -238,6 +238,23 @@
     .hc-date{display:block;flex-shrink:0;font-size:13px;font-weight:700;color:#e2e8f0;white-space:nowrap;}
     .hc-date .sdot{margin-right:6px;}
   }
+  .rb-ico.red{background:rgba(239,68,68,.15);}
+  .rep-form{max-width:640px;}
+  .rep-l{display:block;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--light);margin:14px 0 6px;}
+  .rep-i{width:100%;min-height:46px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font:inherit;font-size:16px;outline:none;}
+  .rep-i:focus{border-color:var(--blue);}
+  .rep-ta{resize:vertical;line-height:1.4;}
+  .rep-sel{appearance:auto;cursor:pointer;}
+  #box-car .rep-sel+*,#box-user .rep-sel+*{margin-top:8px;}
+  #box-car:not(:empty)+.rep-i,#box-user:not(:empty)+.rep-i{margin-top:8px;}
+  .rep-chk{display:flex;align-items:center;gap:10px;margin:16px 0 4px;font-size:14px;color:var(--text);cursor:pointer;}
+  .rep-chk input{width:22px;height:22px;accent-color:#22c55e;flex-shrink:0;}
+  .rep-send{width:100%;min-height:50px;margin-top:16px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:inherit;font-size:16px;font-weight:800;cursor:pointer;}
+  .rep-send:disabled{background:#334155;color:#94a3b8;cursor:default;}
+  .rep-msg{margin-top:14px;font-size:14px;line-height:1.5;border-radius:10px;}
+  .rep-msg.ok{padding:12px 14px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.4);color:#bbf7d0;}
+  .rep-msg.ko{padding:12px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);color:#fecaca;}
+  .rep-fbtn{display:inline-flex;align-items:center;gap:8px;margin:0 0 22px;padding:11px 16px;border-radius:10px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.45);color:#fecaca;font-size:14px;font-weight:700;text-decoration:none;}
 </style>
 </head>
 <body>
@@ -339,10 +356,28 @@ function getField(item, ...possibleNames){
 // La respuesta puede venir en distintas formas segun como este montada la
 // accion "Respuesta" en Power Automate: array directo, {datos:[...]} o
 // {value:[...]} (tipico de "Obtener filas"). Se aceptan las tres.
-function extractRows(data){
+// Admite la respuesta en cualquiera de las formas que puede devolver el flujo:
+// una lista de filas, {datos:[...]}, {value:[...]}, el contenido del archivo JSON
+// metido dentro de "datos" (como objeto, como texto o en base64 con $content), etc.
+function extractRows(data,depth){
+  depth=depth||0;
+  if(depth>4||data==null)return null;
   if(Array.isArray(data))return data;
-  if(data&&Array.isArray(data.datos))return data.datos;
-  if(data&&Array.isArray(data.value))return data.value;
+  if(typeof data==='string'){
+    try{return extractRows(JSON.parse(data),depth+1);}catch(e){return null;}
+  }
+  if(typeof data!=='object')return null;
+  if(typeof data['$content']==='string'){
+    try{
+      var bin=atob(data['$content']);
+      var bytes=new Uint8Array(bin.length);
+      for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+      return extractRows(JSON.parse(new TextDecoder('utf-8').decode(bytes)),depth+1);
+    }catch(e){return null;}
+  }
+  if('datos' in data)return extractRows(data.datos,depth+1);
+  if('value' in data)return extractRows(data.value,depth+1);
+  if('body' in data)return extractRows(data.body,depth+1);
   return null;
 }
 
@@ -370,6 +405,9 @@ async function loadData(){
       showError('La respuesta no es JSON valido.','Esto pasa si la URL apunta a un archivo en vez de al flujo de Power Automate, o si devolvio un error HTML.',rawText);
       return;
     }
+    // Listas oficiales de la pestaña "Campos" del Excel, si el flujo las envía:
+    // {"datos":[...filas...], "campos":{"usuarios":[...], "carretillas":[...]}}
+    campos=(data&&!Array.isArray(data)&&data.campos&&typeof data.campos==='object')?data.campos:null;
     var rows=extractRows(data);
     if(rows===null){
       showError('La respuesta es JSON valido pero no tiene la forma esperada.','Claves recibidas: '+Object.keys(data||{}).join(', '),JSON.stringify(data,null,2).slice(0,2000));
@@ -596,6 +634,7 @@ function renderVehiclePage(carCodeRaw){
     +'<div><div style="font-size:28px;font-weight:800;color:var(--light)">'+carCode+'</div>'
     +'<span style="display:inline-block;margin-top:5px;padding:3px 11px;border-radius:5px;font-size:11px;font-weight:700;background:'+vColor+'22;color:'+vColor+'">'+vLabel+'</span></div>'
     +'</div>'
+    +'<a class="rep-fbtn" href="'+location.pathname+'#reportar/'+encodeURIComponent(carCode)+'">📝 Reportar incidencia de '+esc(carCode)+'</a>'
     +'<div class="section-title">Incidencias pendientes ('+pendientes.length+')</div>'+pendHtml
     +'<div class="section-title" style="margin-top:28px">Historial completo ('+mine.length+')</div>'+histHtml;
   setHtml(container,html);
@@ -627,6 +666,7 @@ function currentRoute(){
   if(car)return{view:'ficha',car:car};
   var h=location.hash.replace('#','');
   if(h==='pendientes'||h==='historial')return{view:h};
+  if(h.indexOf('reportar')===0)return{view:'reportar',pre:decodeURIComponent(h.split('/')[1]||'')};
   return{view:'home'};
 }
 function go(v){
@@ -666,6 +706,7 @@ function homeHtml(){
     +'<div class="ck-row">'+checklistBtn(CHECKLIST_CARRETILLAS_URL,'Carretillas',IMG_FORKLIFT)+checklistBtn(CHECKLIST_TRANSPALES_URL,'Transpalés',IMG_TRANSPALETA)+'</div>'
     +'<div class="section-title" style="margin-top:26px">Incidencias</div>'
     +'<button class="row-btn" data-go="pendientes"><span class="rb-ico amber">⚠️</span><span class="rb-txt"><strong>Incidencias pendientes</strong><small id="home-pend-sub">Cargando…</small></span><span class="rb-num" id="home-pend-num">…</span><span class="rb-arrow">›</span></button>'
+    +'<button class="row-btn" data-go="reportar"><span class="rb-ico red">📝</span><span class="rb-txt"><strong>Reportar incidencia</strong><small>Envía un aviso por correo al JJEE</small></span><span class="rb-arrow">›</span></button>'
     +'<button class="row-btn" data-go="historial"><span class="rb-ico blue">🕘</span><span class="rb-txt"><strong>Historial de un equipo</strong><small>Carretillas y transpalés, aunque no tengan incidencias ahora</small></span><span class="rb-arrow">›</span></button>'
     +'</div>';
 }
@@ -753,8 +794,26 @@ function historialShell(){
     +'<div class="finder"><span class="si">🔍</span><input id="q" type="text" autocomplete="off" placeholder="Buscar por código…" oninput="onQuery(this.value)"></div>'
     +'<div id="res"></div>';
 }
+var campos=null;
+// Devuelve una lista de "Campos" limpia (texto, sin vacíos ni repetidos); [] si no llegó.
+function camposList(name){
+  var arr=campos&&Array.isArray(campos[name])?campos[name]:[];
+  var seen=Object.create(null),out=[];
+  arr.forEach(function(v){
+    if(v&&typeof v==='object'){var ks=Object.keys(v);v=ks.length?v[ks[0]]:'';}
+    v=String(v==null?'':v).trim();
+    if(!v||seen[v.toUpperCase()])return;
+    seen[v.toUpperCase()]=1;out.push(v);
+  });
+  return out;
+}
 function equipmentIndex(){
   var map=Object.create(null);
+  // Flota completa desde "Campos" (así salen también los equipos que nunca tuvieron incidencias)
+  camposList('carretillas').forEach(function(raw){
+    var k=raw.toUpperCase();
+    if(!map[k])map[k]={code:raw,type:vehicleType(raw),pend:0};
+  });
   allRows.forEach(function(r){
     var raw=String(r.carretilla==null?'':r.carretilla).trim();
     if(!raw||raw==='?'||raw==='—')return;
@@ -794,9 +853,158 @@ function updateFicha(car){
   renderVehiclePage(car);
 }
 
+// --- Reportar incidencia (el carretillero envía el aviso; un flujo de Power Automate
+//     manda un correo al JJEE, que la registra en el Excel como hasta ahora) ---
+// Pega aquí la dirección del flujo "Cuando se recibe una solicitud HTTP" (método POST).
+// Mientras esté vacía, el botón Enviar aparece desactivado.
+var REPORT_FLOW_URL='';
+// Clave compartida con el flujo: el flujo rechaza envíos que no la traigan.
+// No es una contraseña secreta (se ve en el HTML); solo frena envíos casuales.
+var REPORT_KEY='QlQ-HWlRIhBMt_Kb';
+var reportSending=false;
+
+function knownUsers(){
+  var oficial=camposList('usuarios');
+  if(oficial.length)return oficial.sort(function(a,b){return a.localeCompare(b,'es');});
+  var seen=Object.create(null),out=[];
+  allRows.forEach(function(r){
+    var u=String(r.usuario==null?'':r.usuario).trim();
+    if(!u||u==='—')return;
+    var k=u.toUpperCase();
+    if(seen[k])return;
+    seen[k]=1;out.push(u);
+  });
+  return out.sort(function(a,b){return a.localeCompare(b,'es');});
+}
+function reportarShell(car){
+  var ready=!!REPORT_FLOW_URL;
+  return '<div class="view-head"><button class="back-btn" data-act="rback">← Volver</button><h2>Reportar incidencia</h2></div>'
+    +'<form class="rep-form" id="rep-form" onsubmit="return sendReport(event)" autocomplete="off" novalidate>'
+    +'<label class="rep-l" for="rep-car">Carretilla / transpalé</label>'
+    +'<div id="box-car"></div>'
+    +'<input class="rep-i" id="rep-car" list="dl-car" maxlength="20" placeholder="Ej. C23" value="'+esc(car||'')+'">'
+    +'<datalist id="dl-car"></datalist>'
+    +'<label class="rep-l" for="rep-user">Tu nombre</label>'
+    +'<div id="box-user"></div>'
+    +'<input class="rep-i" id="rep-user" list="dl-user" maxlength="60" placeholder="Elige o escribe tu nombre">'
+    +'<datalist id="dl-user"></datalist>'
+    +'<label class="rep-l" for="rep-txt">¿Qué le pasa?</label>'
+    +'<textarea class="rep-i rep-ta" id="rep-txt" maxlength="300" rows="4" placeholder="Describe la avería en pocas palabras"></textarea>'
+    +'<label class="rep-chk"><input type="checkbox" id="rep-jav"> He llamado a Javier para avisar de la avería</label>'
+    +'<button class="rep-send" id="rep-send" type="submit"'+(ready?'':' disabled')+'>'+(ready?'Enviar incidencia':'Envío pendiente de conectar')+'</button>'
+    +'<div class="rep-msg" id="rep-msg"></div>'
+    +'<p class="hint" style="margin-top:12px">Se envía un correo al JJEE con tu aviso. El JJEE la registra en el Excel y entonces aparece en el panel.</p>'
+    +'</form>';
+}
+// Desplegables con las listas oficiales de la pestaña "Campos" del Excel.
+// El valor que se envía siempre está en el campo de texto (#rep-car / #rep-user);
+// el desplegable lo rellena, y "Otro…" deja escribirlo a mano.
+var OTRO='__otro';
+function pickerHtml(id,optionsHtml,placeholder){
+  return '<select class="rep-i rep-sel" id="'+id+'-sel" data-for="'+id+'" onchange="pickerChange(\''+id+'\')">'
+    +'<option value="">'+placeholder+'</option>'+optionsHtml
+    +'<option value="'+OTRO+'">Otro (escribir)…</option></select>';
+}
+function pickerChange(id){
+  var sel=$(id+'-sel'),inp=$(id);if(!sel||!inp)return;
+  if(sel.value===OTRO){inp.style.display='';inp.value='';inp.focus();}
+  else{inp.style.display='none';inp.value=sel.value;}
+}
+// Coloca el desplegable en la opción que corresponda al texto actual (p. ej. la carretilla
+// que viene ya puesta desde su ficha); si no está en la lista, deja "Otro" con el texto.
+function pickerSync(id){
+  var sel=$(id+'-sel'),inp=$(id);if(!sel||!inp)return;
+  var v=inp.value.trim().toUpperCase(),hit='';
+  Array.prototype.forEach.call(sel.options,function(o){if(o.value&&o.value!==OTRO&&o.value.toUpperCase()===v)hit=o.value;});
+  if(hit){sel.value=hit;inp.value=hit;inp.style.display='none';}
+  else if(v){sel.value=OTRO;inp.style.display='';}
+  else{sel.value='';inp.style.display='none';}
+}
+function fillPicker(id,optionsHtml,placeholder){
+  var box=$('box-'+id.replace('rep-','')),inp=$(id),dl=$('dl-'+id.replace('rep-',''));
+  if(!box||!inp)return;
+  if(!optionsHtml){
+    // Sin listas oficiales: texto libre con sugerencias, como antes
+    setHtml(box,'');inp.style.display='';
+    return false;
+  }
+  var before=box.__html;
+  setHtml(box,pickerHtml(id,optionsHtml,placeholder));
+  if(box.__html!==before)pickerSync(id);
+  if(dl)setHtml(dl,'');
+  return true;
+}
+function updateReportar(){
+  // Carretillas: lista oficial agrupada por tipo
+  var cars=camposList('carretillas').slice().sort(function(a,b){return a.localeCompare(b,'es',{numeric:true});});
+  var carOpts='';
+  if(cars.length){
+    GROUPS.forEach(function(g){
+      var items=cars.filter(function(c){return vehicleType(c)===g[0];});
+      if(items.length)carOpts+='<optgroup label="'+g[1]+'">'+items.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('')+'</optgroup>';
+    });
+  }
+  var users=camposList('usuarios').slice().sort(function(a,b){return a.localeCompare(b,'es');});
+  var userOpts=users.map(function(u){return '<option value="'+esc(u)+'">'+esc(u)+'</option>';}).join('');
+  if(!fillPicker('rep-car',carOpts,'— Elige el equipo —')){
+    var dc=$('dl-car');
+    if(dc)setHtml(dc,equipmentIndex().map(function(e){return e.code;}).sort(function(a,b){return a.localeCompare(b,'es',{numeric:true});}).map(function(c){return '<option value="'+esc(c)+'">';}).join(''));
+  }
+  if(!fillPicker('rep-user',userOpts,'— Elige tu nombre —')){
+    var du=$('dl-user');
+    if(du)setHtml(du,knownUsers().map(function(u){return '<option value="'+esc(u)+'">';}).join(''));
+  }
+}
+function reportMsg(ok,html){
+  var m=$('rep-msg');if(!m)return;
+  m.className='rep-msg '+(ok?'ok':'ko');
+  m.innerHTML=html;
+}
+async function sendReport(ev){
+  if(ev)ev.preventDefault();
+  if(reportSending||!REPORT_FLOW_URL)return false;
+  var car=$('rep-car').value.trim().toUpperCase();
+  var user=$('rep-user').value.trim();
+  var txt=$('rep-txt').value.trim();
+  if(!car||!user||!txt){reportMsg(false,'Rellena carretilla, nombre e incidencia.');return false;}
+  var known=equipmentIndex().some(function(e){return e.code.toUpperCase()===car;});
+  if(!known&&!confirm('El equipo «'+car+'» no aparece en el registro. ¿Enviar igualmente?'))return false;
+  var users=camposList('usuarios');
+  if(users.length){
+    var match=users.filter(function(u){return u.toUpperCase()===user.toUpperCase();})[0];
+    if(match)user=match;
+    else if(!confirm('«'+user+'» no está en la lista de usuarios. ¿Enviar igualmente?'))return false;
+  }
+  var d=new Date();
+  var fecha=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  var payload={clave:REPORT_KEY,carretilla:car,usuario:user,incidencia:txt,avisadoJavier:$('rep-jav').checked,fecha:fecha};
+  var btn=$('rep-send');
+  reportSending=true;btn.disabled=true;btn.textContent='Enviando…';
+  try{
+    // text/plain evita la "petición previa" CORS (OPTIONS), que el disparador HTTP
+    // de Power Automate no contesta. El flujo convierte el texto a JSON.
+    var resp=await fetch(REPORT_FLOW_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(payload)});
+    if(!resp.ok)throw new Error('respuesta '+resp.status);
+    $('rep-form').reset();
+    $('rep-car').value='';$('rep-user').value='';
+    pickerSync('rep-car');pickerSync('rep-user');
+    reportMsg(true,'✅ Aviso de <b>'+esc(car)+'</b> enviado al JJEE.');
+  }catch(err){
+    reportMsg(false,'❌ No se pudo enviar ('+esc(err.message)+'). Avisa al JJEE de palabra y vuelve a intentarlo más tarde.');
+  }finally{
+    reportSending=false;btn.disabled=false;btn.textContent='Enviar incidencia';
+  }
+  return false;
+}
+function reportBack(){
+  if((history.state&&history.state.v)||cameFromApp()){history.back();return;}
+  history.replaceState(null,'',location.pathname);renderView();window.scrollTo(0,0);
+}
+
 // --- Control general ---
-function buildShell(view){
+function buildShell(view,r){
   var v=$('view');
+  if(view==='reportar'){setHtml(v,reportarShell(r&&r.pre));return;}
   if(view==='home')setHtml(v,homeHtml());
   else if(view==='pendientes')setHtml(v,pendientesShell());
   else if(view==='historial')setHtml(v,historialShell());
@@ -807,14 +1015,15 @@ function updateView(){
   if(r.view==='home')updateHome();
   else if(r.view==='pendientes')updatePendientes();
   else if(r.view==='historial')updateHistorial();
+  else if(r.view==='reportar')updateReportar();
   else updateFicha(r.car);
 }
 function renderView(){
   var r=currentRoute();
-  var key=r.view+(r.car?':'+r.car:'');
+  var key=r.view+(r.car?':'+r.car:'')+(r.pre?':'+r.pre:'');
   if(key!==renderedKey){
     renderedKey=key;query='';activeFilter='all';
-    buildShell(r.view);
+    buildShell(r.view,r);
   }
   updateView();
 }
@@ -827,6 +1036,7 @@ function onViewClick(e){
   else if(el.hasAttribute('data-f'))setFilter(el.getAttribute('data-f'));
   else if(el.getAttribute('data-act')==='home')goHome();
   else if(el.getAttribute('data-act')==='back')goBack();
+  else if(el.getAttribute('data-act')==='rback')reportBack();
 }
 
 var _detailOpen=false;
