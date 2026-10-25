@@ -255,6 +255,9 @@
   .rep-msg.ok{padding:12px 14px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.4);color:#bbf7d0;}
   .rep-msg.ko{padding:12px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);color:#fecaca;}
   .rep-fbtn{display:inline-flex;align-items:center;gap:8px;margin:0 0 22px;padding:11px 16px;border-radius:10px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.45);color:#fecaca;font-size:14px;font-weight:700;text-decoration:none;}
+  .planta-btn{margin-top:6px;display:inline-flex;align-items:center;gap:4px;background:rgba(59,130,246,.15);border:1px solid var(--blue);color:var(--light);border-radius:999px;padding:3px 11px;font:inherit;font-size:12px;cursor:pointer;}
+  .planta-btn[hidden]{display:none;}
+  .planta-btn b{color:#fff;}
 </style>
 </head>
 <body>
@@ -266,6 +269,7 @@
     <div class="logo-text">
       <h1>PANEL INCIDENCIAS</h1>
       <p>Control de incidencias · Carretillas</p>
+      <button class="planta-btn" id="planta-btn" onclick="choosePlanta()" hidden>📍 <b id="planta-name"></b> · cambiar</button>
     </div>
   </div>
   <div class="header-right">
@@ -305,7 +309,7 @@
       <div class="detail-field"><label>🔧 Responsable</label><div class="val" id="d-re"></div></div>
       <div class="detail-field"><label>⚡ Prioridad</label><div class="val" id="d-pr"></div></div>
       <div class="detail-field"><label>🔄 Estado</label><div class="val" id="d-es"></div></div>
-      <div class="detail-field"><label>📞 Aviso a Javier</label><div class="val" id="d-av"></div></div>
+      <div class="detail-field"><label id="d-av-label">📞 Aviso a Javier</label><div class="val" id="d-av"></div></div>
     </div>
     <div class="detail-obs"><label>📝 Observaciones</label><div class="val" id="d-ob"></div></div>
   </div>
@@ -315,7 +319,43 @@
 // incidencias_pendientes.html: debe aceptar GET y devolver la cabecera
 // 'Access-Control-Allow-Origin: *', si no el navegador bloquea la lectura
 // por CORS (se ve como "Failed to fetch", sin mas detalle).
-var JSON_URL = 'https://default4c49bed785da470cafc37735b371a3.43.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/24/workflows/f62cce79b444494aad955507360db643/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=VSWqnfDZqHEbg9rOCYfYYKl3DPhroUBpsK0QDDIWcQA';
+var JSON_URL_GRELA = 'https://default4c49bed785da470cafc37735b371a3.43.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/24/workflows/f62cce79b444494aad955507360db643/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=VSWqnfDZqHEbg9rOCYfYYKl3DPhroUBpsK0QDDIWcQA';
+
+// ===== Fábricas =====
+// Cada fábrica tiene su propio flujo de datos (su Excel de incidencias) y su correo de avisos.
+// Para conectar Moras, pega en "json" la dirección GET de su flujo "API Incidencias JSON".
+var PLANTAS={
+  grela:{nombre:'A Grela',json:JSON_URL_GRELA,correo:'salidas@estrellagalicia.es',avisoA:'a Javier',avisoCorto:'Aviso a Javier'},
+  moras:{nombre:'Moras',json:'https://default4c49bed785da470cafc37735b371a3.43.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/02/workflows/2f8981ef49c5438e9f586366620eebb6/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UhB2hpOVcOAwJN0Jjz_y3yoOvnEk569D0t8Vnu8nhyI',correo:'ExpedicionesMoras@estrellagalicia.es',avisoA:'al Servicio Técnico',avisoCorto:'Aviso a S. Técnico'}
+};
+function storeGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function storeSet(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){}}
+// Orden: ?planta= en la dirección (QR, acceso directo) > la guardada en este móvil >
+// QR antiguos sin planta (?carretilla=…) = A Grela > si no hay nada, se pregunta.
+function resolvePlanta(){
+  var q=new URLSearchParams(location.search);
+  var p=(q.get('planta')||'').toLowerCase();
+  if(PLANTAS[p]){storeSet('planta',p);return p;}
+  var st=storeGet('planta');
+  if(st&&PLANTAS[st])return st;
+  if(q.get('carretilla'))return 'grela';
+  return null;
+}
+var PLANTA=resolvePlanta();
+var JSON_URL=PLANTA?PLANTAS[PLANTA].json:'';
+function plantaCorreo(){return PLANTA?PLANTAS[PLANTA].correo:'';}
+// A quién se avisa de la avería en cada fábrica (A Grela: Javier; Moras: Servicio Técnico)
+function avisoA(){return PLANTA?PLANTAS[PLANTA].avisoA:'a Javier';}
+function avisoCorto(){return PLANTA?PLANTAS[PLANTA].avisoCorto:'Aviso a Javier';}
+function setPlanta(p){
+  if(!PLANTAS[p])return;
+  storeSet('planta',p);
+  location.href=location.pathname+'?planta='+p;
+}
+function choosePlanta(){
+  storeSet('planta',null);
+  location.href=location.pathname;
+}
 var incidencias = [];
 var allRows = []; // TODO el historico (pendientes y solucionadas), para la ficha de vehiculo por QR
 var activeFilter = 'all';
@@ -343,9 +383,19 @@ function excelDateRaw(s){
 // Power Automate (p.ej. "JJEE / AUX_x002e_ DESC_x002e_" en vez de
 // "JJEE / AUX. DESC."), asi que se busca por coincidencia parcial ademas
 // del nombre exacto, para no depender de la codificacion concreta.
+// Busca una columna por su nombre, tolerando las diferencias entre los Excel de A Grela y Moras
+// (mayúsculas, tildes, saltos de línea en la cabecera y la codificación _x002e_ de Power Automate).
+function normKey(k){
+  return String(k).replace(/_x002e_/g,'.').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+}
 function getField(item, ...possibleNames){
   for(var i=0;i<possibleNames.length;i++){if(item[possibleNames[i]]!==undefined)return item[possibleNames[i]];}
   var keys=Object.keys(item);
+  for(var n=0;n<possibleNames.length;n++){
+    var want=normKey(possibleNames[n]);
+    var exact=keys.find(function(k){return normKey(k)===want;});
+    if(exact)return item[exact];
+  }
   for(var j=0;j<possibleNames.length;j++){
     var found=keys.find(function(k){return k.toLowerCase().includes(possibleNames[j].toLowerCase().substring(0,5));});
     if(found)return item[found];
@@ -391,6 +441,12 @@ function isChecked(v){
   return s==='true'||s==='verdadero'||s==='sí'||s==='si'||s==='1'||s==='x'||s==='yes';
 }
 async function loadData(){
+  if(!PLANTA)return;
+  if(!JSON_URL){
+    showError('Los datos de '+PLANTAS[PLANTA].nombre+' aún no están conectados.','Falta la dirección del flujo de datos de esta fábrica. Los checklist sí funcionan.','');
+    updateSyncInfo(false);
+    return;
+  }
   try{
     var response=await fetch(JSON_URL);
     var rawText=await response.text();
@@ -424,9 +480,9 @@ async function loadData(){
         usuario:getField(r,'USUARIO')||'—',
         incidencia:getField(r,'INCIDENCIA')||'—',
         fechaAveria:excelDate(getField(r,'FECHA AVERIA')),
-        fechaAviso:excelDate(getField(r,'FECHA AVISO\n Javier 71908')),
+        fechaAviso:excelDate(getField(r,'FECHA AVISO\n Javier 71908','FECHA AVISO')),
         responsable:getField(r,'JJEE / AUX_x002e_ DESC_x002e_','JJEE','AUX')||'—',
-        avisadoJavier:isChecked(getField(r,'AVISADO JAVIER','AVISADO')),
+        avisadoJavier:isChecked(getField(r,'AVISADO JAVIER','AVISADO SERVICIO TECNICO','AVISADO')),
         prioridad:getField(r,'PRIORIDAD')||'',
         estado:getField(r,'ESTADO REPARACION')||'—',
         observaciones:getField(r,'OBSERVACIONES')||''
@@ -440,9 +496,9 @@ async function loadData(){
         incidencia:getField(r,'INCIDENCIA')||'—',
         fechaAveria:excelDate(getField(r,'FECHA AVERIA')),
         fechaAveriaRaw:excelDateRaw(getField(r,'FECHA AVERIA')),
-        fechaAviso:excelDate(getField(r,'FECHA AVISO\n Javier 71908')),
+        fechaAviso:excelDate(getField(r,'FECHA AVISO\n Javier 71908','FECHA AVISO')),
         responsable:getField(r,'JJEE / AUX_x002e_ DESC_x002e_','JJEE','AUX')||'—',
-        avisadoJavier:isChecked(getField(r,'AVISADO JAVIER','AVISADO')),
+        avisadoJavier:isChecked(getField(r,'AVISADO JAVIER','AVISADO SERVICIO TECNICO','AVISADO')),
         prioridad:getField(r,'PRIORIDAD')||'',
         estado:getField(r,'ESTADO REPARACION')||'—',
         fechaArreglo:excelDate(getField(r,'FECHA ARREGLO')),
@@ -575,7 +631,7 @@ function buildCard(item,delay,mode){
         infoChip('🔧','Responsable',resp)+
       '</div>'+
       '<div class="pc-side">'+
-        infoChip('📞','Aviso a Javier',item.avisadoJavier?'☑ Sí, avisado':'☐ Sin avisar',item.avisadoJavier?'ok':'no')+
+        infoChip('📞',esc(avisoCorto()),item.avisadoJavier?'☑ Sí, avisado':'☐ Sin avisar',item.avisadoJavier?'ok':'no')+
         '<div class="st" style="color:var(--accent2)"><i class="sdot" style="background:var(--accent2)"></i>'+esc(item.estado)+'</div>'+
       '</div>'+
     '</div>'+
@@ -662,6 +718,7 @@ function setHtml(el,html){
 
 // --- Rutas: menú (sin nada), #pendientes, #historial, y ?carretilla=CODIGO (ficha, también la del QR) ---
 function currentRoute(){
+  if(!PLANTA)return{view:'planta'};
   var car=new URLSearchParams(location.search).get('carretilla');
   if(car)return{view:'ficha',car:car};
   var h=location.hash.replace('#','');
@@ -690,7 +747,16 @@ function backButtonHtml(){
   return '<button class="back-btn" data-act="back" style="margin-bottom:16px">'+(cameFromApp()?'← Volver':'← Menú principal')+'</button>';
 }
 function goToVehicle(code){
-  location.href='?carretilla='+encodeURIComponent(code);
+  location.href='?planta='+PLANTA+'&carretilla='+encodeURIComponent(code);
+}
+
+// --- Elegir fábrica (solo la primera vez en cada móvil) ---
+function plantaShell(){
+  return '<div class="home"><div class="section-title">Elige tu fábrica</div>'
+    +Object.keys(PLANTAS).map(function(k){
+      return '<button class="row-btn" data-planta="'+k+'"><span class="rb-ico blue">🏭</span><span class="rb-txt"><strong>'+PLANTAS[k].nombre+'</strong><small>Se recordará en este móvil. Se puede cambiar arriba.</small></span><span class="rb-arrow">›</span></button>';
+    }).join('')
+    +'</div>';
 }
 
 // --- Menú principal ---
@@ -706,7 +772,7 @@ function homeHtml(){
     +'<div class="ck-row">'+checklistBtn(CHECKLIST_CARRETILLAS_URL,'Carretillas',IMG_FORKLIFT)+checklistBtn(CHECKLIST_TRANSPALES_URL,'Transpalés',IMG_TRANSPALETA)+'</div>'
     +'<div class="section-title" style="margin-top:26px">Incidencias</div>'
     +'<button class="row-btn" data-go="pendientes"><span class="rb-ico amber">⚠️</span><span class="rb-txt"><strong>Incidencias pendientes</strong><small id="home-pend-sub">Cargando…</small></span><span class="rb-num" id="home-pend-num">…</span><span class="rb-arrow">›</span></button>'
-    +'<button class="row-btn" data-go="reportar"><span class="rb-ico red">📝</span><span class="rb-txt"><strong>Reportar incidencia</strong><small>Envía un aviso por correo a salidas@estrellagalicia.es</small></span><span class="rb-arrow">›</span></button>'
+    +'<button class="row-btn" data-go="reportar"><span class="rb-ico red">📝</span><span class="rb-txt"><strong>Reportar incidencia</strong><small>Envía un aviso por correo a '+esc(plantaCorreo())+'</small></span><span class="rb-arrow">›</span></button>'
     +'<button class="row-btn" data-go="historial"><span class="rb-ico blue">🕘</span><span class="rb-txt"><strong>Historial de un equipo</strong><small>Carretillas y transpalés, aunque no tengan incidencias ahora</small></span><span class="rb-arrow">›</span></button>'
     +'</div>';
 }
@@ -890,7 +956,7 @@ function reportarShell(car){
     +'<datalist id="dl-user"></datalist>'
     +'<label class="rep-l" for="rep-txt">¿Qué le pasa?</label>'
     +'<textarea class="rep-i rep-ta" id="rep-txt" maxlength="300" rows="4" placeholder="Describe la avería en pocas palabras"></textarea>'
-    +'<label class="rep-chk"><input type="checkbox" id="rep-jav"> He llamado a Javier para avisar de la avería</label>'
+    +'<label class="rep-chk"><input type="checkbox" id="rep-jav"> He llamado '+esc(avisoA())+' para avisar de la avería</label>'
     +'<button class="rep-send" id="rep-send" type="submit"'+(ready?'':' disabled')+'>'+(ready?'Enviar incidencia':'Envío pendiente de conectar')+'</button>'
     +'<div class="rep-msg" id="rep-msg"></div>'
     +'<p class="hint" style="margin-top:12px">Se envía un correo al JJEE/AUX con tu aviso. El JJEE/AUX la registra en el Excel y entonces aparece en el panel.</p>'
@@ -977,7 +1043,7 @@ async function sendReport(ev){
   }
   var d=new Date();
   var fecha=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  var payload={clave:REPORT_KEY,carretilla:car,usuario:user,incidencia:txt,avisadoJavier:$('rep-jav').checked,fecha:fecha};
+  var payload={clave:REPORT_KEY,planta:PLANTA,carretilla:car,usuario:user,incidencia:txt,avisadoJavier:$('rep-jav').checked,avisoA:avisoA(),fecha:fecha};
   var btn=$('rep-send');
   reportSending=true;btn.disabled=true;btn.textContent='Enviando…';
   try{
@@ -988,7 +1054,7 @@ async function sendReport(ev){
     $('rep-form').reset();
     $('rep-car').value='';$('rep-user').value='';
     pickerSync('rep-car');pickerSync('rep-user');
-    reportMsg(true,'✅ Aviso de <b>'+esc(car)+'</b> enviado a salidas@estrellagalicia.es');
+    reportMsg(true,'✅ Aviso de <b>'+esc(car)+'</b> enviado a '+esc(plantaCorreo()));
   }catch(err){
     reportMsg(false,'❌ No se pudo enviar ('+esc(err.message)+'). Avisa al JJEE/AUX de palabra y vuelve a intentarlo más tarde.');
   }finally{
@@ -1004,6 +1070,7 @@ function reportBack(){
 // --- Control general ---
 function buildShell(view,r){
   var v=$('view');
+  if(view==='planta'){setHtml(v,plantaShell());return;}
   if(view==='reportar'){setHtml(v,reportarShell(r&&r.pre));return;}
   if(view==='home')setHtml(v,homeHtml());
   else if(view==='pendientes')setHtml(v,pendientesShell());
@@ -1015,6 +1082,7 @@ function updateView(){
   if(r.view==='home')updateHome();
   else if(r.view==='pendientes')updatePendientes();
   else if(r.view==='historial')updateHistorial();
+  else if(r.view==='planta'){}
   else if(r.view==='reportar')updateReportar();
   else updateFicha(r.car);
 }
@@ -1029,8 +1097,9 @@ function renderView(){
 }
 function onQuery(v){query=v;updateView();}
 function onViewClick(e){
-  var el=e.target.closest?e.target.closest('[data-go],[data-car],[data-f],[data-act]'):null;
+  var el=e.target.closest?e.target.closest('[data-go],[data-car],[data-f],[data-act],[data-planta]'):null;
   if(!el)return;
+  if(el.hasAttribute('data-planta')){setPlanta(el.getAttribute('data-planta'));return;}
   if(el.hasAttribute('data-car'))goToVehicle(el.getAttribute('data-car'));
   else if(el.hasAttribute('data-go'))go(el.getAttribute('data-go'));
   else if(el.hasAttribute('data-f'))setFilter(el.getAttribute('data-f'));
@@ -1106,6 +1175,7 @@ if('serviceWorker' in navigator){
   });
 }
 
+if(PLANTA){$('planta-name').textContent=PLANTAS[PLANTA].nombre;$('planta-btn').hidden=false;$('d-av-label').textContent='📞 '+avisoCorto();}
 $('view').addEventListener('click',onViewClick);
 window.addEventListener('popstate',renderView);
 renderView();
