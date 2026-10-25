@@ -706,7 +706,7 @@ function homeHtml(){
     +'<div class="ck-row">'+checklistBtn(CHECKLIST_CARRETILLAS_URL,'Carretillas',IMG_FORKLIFT)+checklistBtn(CHECKLIST_TRANSPALES_URL,'Transpalés',IMG_TRANSPALETA)+'</div>'
     +'<div class="section-title" style="margin-top:26px">Incidencias</div>'
     +'<button class="row-btn" data-go="pendientes"><span class="rb-ico amber">⚠️</span><span class="rb-txt"><strong>Incidencias pendientes</strong><small id="home-pend-sub">Cargando…</small></span><span class="rb-num" id="home-pend-num">…</span><span class="rb-arrow">›</span></button>'
-    +'<button class="row-btn" data-go="reportar"><span class="rb-ico red">📝</span><span class="rb-txt"><strong>Reportar incidencia</strong><small>Envía un aviso por correo al JJEE</small></span><span class="rb-arrow">›</span></button>'
+    +'<button class="row-btn" data-go="reportar"><span class="rb-ico red">📝</span><span class="rb-txt"><strong>Reportar incidencia</strong><small>Envía un aviso por correo a salidas@estrellagalicia.es</small></span><span class="rb-arrow">›</span></button>'
     +'<button class="row-btn" data-go="historial"><span class="rb-ico blue">🕘</span><span class="rb-txt"><strong>Historial de un equipo</strong><small>Carretillas y transpalés, aunque no tengan incidencias ahora</small></span><span class="rb-arrow">›</span></button>'
     +'</div>';
 }
@@ -893,7 +893,7 @@ function reportarShell(car){
     +'<label class="rep-chk"><input type="checkbox" id="rep-jav"> He llamado a Javier para avisar de la avería</label>'
     +'<button class="rep-send" id="rep-send" type="submit"'+(ready?'':' disabled')+'>'+(ready?'Enviar incidencia':'Envío pendiente de conectar')+'</button>'
     +'<div class="rep-msg" id="rep-msg"></div>'
-    +'<p class="hint" style="margin-top:12px">Se envía un correo al JJEE con tu aviso. El JJEE la registra en el Excel y entonces aparece en el panel.</p>'
+    +'<p class="hint" style="margin-top:12px">Se envía un correo al JJEE/AUX con tu aviso. El JJEE/AUX la registra en el Excel y entonces aparece en el panel.</p>'
     +'</form>';
 }
 // Desplegables con las listas oficiales de la pestaña "Campos" del Excel.
@@ -988,9 +988,9 @@ async function sendReport(ev){
     $('rep-form').reset();
     $('rep-car').value='';$('rep-user').value='';
     pickerSync('rep-car');pickerSync('rep-user');
-    reportMsg(true,'✅ Aviso de <b>'+esc(car)+'</b> enviado al JJEE.');
+    reportMsg(true,'✅ Aviso de <b>'+esc(car)+'</b> enviado a salidas@estrellagalicia.es');
   }catch(err){
-    reportMsg(false,'❌ No se pudo enviar ('+esc(err.message)+'). Avisa al JJEE de palabra y vuelve a intentarlo más tarde.');
+    reportMsg(false,'❌ No se pudo enviar ('+esc(err.message)+'). Avisa al JJEE/AUX de palabra y vuelve a intentarlo más tarde.');
   }finally{
     reportSending=false;btn.disabled=false;btn.textContent='Enviar incidencia';
   }
